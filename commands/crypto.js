@@ -21,7 +21,7 @@ module.exports = {
 
         try {
             // Fetch current price and percentage changes from Dexscreener
-            const response = await axios.get(`https://api.dexscreener.com/latest/dex/pairs/${symbol}`);
+            const response = await axios.get(`https://api.dexscreener.com/latest/dex/tokens/${symbol}`);
 
             if (!response.data || !response.data.pairs || response.data.pairs.length === 0) {
                 throw new Error('Invalid cryptocurrency symbol');
@@ -31,7 +31,7 @@ module.exports = {
 
             // Fetch 7-day historical data for the chart
             // Assuming Dexscreener API provides historical data (if not, you need to adjust the logic accordingly)
-            const historyResponse = await axios.get(`https://api.dexscreener.com/latest/dex/pairs/${symbol}/chart`, {
+            const historyResponse = await axios.get(`https://api.dexscreener.com/latest/dex/tokens/${cryptoData.id}/chart`, {
                 params: {
                     interval: '1d',
                     limit: 7,
