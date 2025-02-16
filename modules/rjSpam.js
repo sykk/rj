@@ -7,10 +7,19 @@ module.exports = (client) => {
         return;
     }
 
-    const sendRJMessage = () => {
+    const sendRJMessage = async () => {
         const messages = [':rj:', ':rjnod:'];
         const message = messages[Math.floor(Math.random() * messages.length)];
-        channel.send(message).catch(console.error);
+        try {
+            const emoji = channel.guild.emojis.cache.find(e => e.name === message.slice(1, -1));
+            if (emoji) {
+                await channel.send(`${emoji}`);
+            } else {
+                console.error(`Emoji ${message} not found`);
+            }
+        } catch (error) {
+            console.error('Error sending message:', error);
+        }
     };
 
     const getRandomInterval = () => Math.floor(Math.random() * (600000 - 300000 + 1)) + 300000;
