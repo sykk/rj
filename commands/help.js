@@ -1,9 +1,17 @@
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const { EmbedBuilder } = require('discord.js');
+
 module.exports = {
-    name: 'help',
-    description: 'Lists all available commands',
-    adminOnly: false,
-    execute(message, args, client) {
-        const commands = client.commands.map(cmd => `**${cmd.name}**: ${cmd.description}`).join('\n');
-        message.channel.send(`Available commands:\n${commands}`);
+    data: new SlashCommandBuilder()
+        .setName('help')
+        .setDescription('Lists all available commands'),
+    async execute(interaction) {
+        const commands = interaction.client.commands.map(cmd => `**${cmd.data.name}**: ${cmd.data.description}`).join('\n');
+        const embed = new EmbedBuilder()
+            .setTitle('Available Commands')
+            .setDescription(commands)
+            .setColor(0x00AE86);
+
+        await interaction.reply({ embeds: [embed] });
     },
 };

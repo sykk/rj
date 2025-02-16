@@ -1,3 +1,5 @@
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const { EmbedBuilder } = require('discord.js');
 const TelegramBot = require('node-telegram-bot-api');
 require('dotenv').config();
 
@@ -9,17 +11,43 @@ telegramBot.on('polling_error', (error) => {
 });
 
 module.exports = {
-    name: 'relay',
-    description: 'Manage relaying messages from Telegram channels to Discord channels',
-    adminOnly: true,
-    execute(message, args, client) {
-        if (args[0] === 'start') {
+    data: new SlashCommandBuilder()
+        .setName('relay')
+        .setDescription('Manage relaying messages from Telegram channels to Discord channels')
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('start')
+                .setDescription('Start relaying messages'))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('stop')
+                .setDescription('Stop relaying messages'))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('add')
+                .setDescription('Add a relay pair')
+                .addStringOption(option => option.setName('discordchannelid').setDescription('The Discord channel ID').setRequired(true))
+                .addStringOption(option => option.setName('telegramchannelid').setDescription('The Telegram channel ID').setRequired(true)))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('delete')
+                .setDescription('Delete a relay pair')
+                .addStringOption(option => option.setName('discordchannelid').setDescription('The Discord channel ID').setRequired(true))
+                .addStringOption(option => option.setName('telegramchannelid').setDescription('The Telegram channel ID').setRequired(true)))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('list')
+                .setDescription('List all relay pairs')),
+    async execute(interaction) {
+        const subcommand = interaction.options.getSubcommand();
+
+        if (subcommand === 'start') {
             if (Object.keys(relayPairs).length === 0) {
-                message.channel.send('No relay pairs have been added. Use "!relay add discordChannelId telegramChannelId" to add a relay pair.');
+                await interaction.reply('No relay pairs have been added. Use `/relay add` to add a relay pair.');
                 return;
             }
 
-            message.channel.send('Relay started. Listening to Telegram channels...');
+            await interaction.reply('Relay started. Listening to Telegram channels...');
             console.log('Relay started. Listening to Telegram channels...');
 
             telegramBot.on('message', (msg) => {
@@ -29,7 +57,7 @@ module.exports = {
                 console.log(`Received message from Telegram channel ID ${telegramChannelId} by ${username}: ${msg.text}`);
 
                 if (discordChannelId) {
-                    const discordChannel = client.channels.cache.get(discordChannelId);
+                    const discordChannel = interaction.client.channels.cache.get(discordChannelId);
                     if (discordChannel) {
                         discordChannel.send(`**${username}**: ${msg.text}`)
                             .then(() => console.log(`Relayed message to Discord channel ID ${discordChannelId}`))
@@ -41,71 +69,63 @@ module.exports = {
                     console.error(`No relay pair found for Telegram channel ID ${telegramChannelId}`);
                 }
             });
-        } else if (args[0] === 'stop') {
-            message.channel.send('Relay stopped.');
+        } else if (subcommand === 'stop') {
+            await interaction.reply('Relay stopped.');
             console.log('Relay stopped.');
             telegramBot.removeAllListeners('message');
-        } else if (args[0] === 'add') {
-            const discordChannelId = args[1];
-            const telegramChannelId = args[2];
-
-            if (!discordChannelId || !telegramChannelId) {
-                message.channel.send('Invalid arguments. Use "!relay add discordChannelId telegramChannelId".');
-                return;
-            }
+        } else if (subcommand === 'add') {
+            const discordChannelId = interaction.options.getString('discordchannelid');
+            const telegramChannelId = interaction.options.getString('telegramchannelid');
 
             relayPairs[telegramChannelId] = discordChannelId;
-            message.channel.send(`Relay pair added: Discord Channel ID ${discordChannelId} <-> Telegram Channel ID ${telegramChannelId}`);
+            await interaction.reply(`Relay pair added: Discord Channel ID ${discordChannelId} <-> Telegram Channel ID ${telegramChannelId}`);
             console.log(`Relay pair added: Discord Channel ID ${discordChannelId} <-> Telegram Channel ID ${telegramChannelId}`);
 
             // Confirm connection to Discord channel
-            const discordChannel = client.channels.cache.get(discordChannelId);
+            const discordChannel = interaction.client.channels.cache.get(discordChannelId);
             if (discordChannel) {
-                message.channel.send(`Connected to Discord channel ID ${discordChannelId}`);
+                await interaction.followUp(`Connected to Discord channel ID ${discordChannelId}`);
                 console.log(`Connected to Discord channel ID ${discordChannelId}`);
             } else {
-                message.channel.send(`Failed to connect to Discord channel ID ${discordChannelId}`);
+                await interaction.followUp(`Failed to connect to Discord channel ID ${discordChannelId}`);
                 console.error(`Failed to connect to Discord channel ID ${discordChannelId}`);
             }
 
             // Confirm connection to Telegram channel
             telegramBot.getChat(telegramChannelId).then(chat => {
-                message.channel.send(`Connected to Telegram channel ID ${telegramChannelId}`);
+                interaction.followUp(`Connected to Telegram channel ID ${telegramChannelId}`);
                 console.log(`Connected to Telegram channel ID ${telegramChannelId}`);
             }).catch(error => {
-                message.channel.send(`Failed to connect to Telegram channel ID ${telegramChannelId}`);
+                interaction.followUp(`Failed to connect to Telegram channel ID ${telegramChannelId}`);
                 console.error(`Failed to connect to Telegram channel ID ${telegramChannelId}: ${error.message}`);
             });
-        } else if (args[0] === 'delete') {
-            const discordChannelId = args[1];
-            const telegramChannelId = args[2];
-
-            if (!discordChannelId || !telegramChannelId) {
-                message.channel.send('Invalid arguments. Use "!relay delete discordChannelId telegramChannelId".');
-                return;
-            }
+        } else if (subcommand === 'delete') {
+            const discordChannelId = interaction.options.getString('discordchannelid');
+            const telegramChannelId = interaction.options.getString('telegramchannelid');
 
             if (relayPairs[telegramChannelId] === discordChannelId) {
                 delete relayPairs[telegramChannelId];
-                message.channel.send(`Relay pair deleted: Discord Channel ID ${discordChannelId} <-> Telegram Channel ID ${telegramChannelId}`);
+                await interaction.reply(`Relay pair deleted: Discord Channel ID ${discordChannelId} <-> Telegram Channel ID ${telegramChannelId}`);
                 console.log(`Relay pair deleted: Discord Channel ID ${discordChannelId} <-> Telegram Channel ID ${telegramChannelId}`);
             } else {
-                message.channel.send('No such relay pair found.');
+                await interaction.reply('No such relay pair found.');
                 console.log('No such relay pair found.');
             }
-        } else if (args[0] === 'list') {
+        } else if (subcommand === 'list') {
             if (Object.keys(relayPairs).length === 0) {
-                message.channel.send('No relay pairs have been added.');
+                await interaction.reply('No relay pairs have been added.');
                 return;
             }
 
-            let relayList = 'Current relay pairs:\n';
+            let relayList = new EmbedBuilder()
+                .setTitle('Current Relay Pairs')
+                .setColor(0x00AE86);
+
             for (const [telegramChannelId, discordChannelId] of Object.entries(relayPairs)) {
-                relayList += `Discord Channel ID: ${discordChannelId} <-> Telegram Channel ID: ${telegramChannelId}\n`;
+                relayList.addFields({ name: `Discord Channel ID: ${discordChannelId}`, value: `Telegram Channel ID: ${telegramChannelId}` });
             }
-            message.channel.send(relayList);
-        } else {
-            message.channel.send('Invalid argument. Use "!relay start" to start the relay, "!relay stop" to stop it, "!relay add discordChannelId telegramChannelId" to add a relay pair, "!relay delete discordChannelId telegramChannelId" to delete a relay pair, or "!relay list" to list all relay pairs.');
+
+            await interaction.reply({ embeds: [relayList] });
         }
     },
 };
