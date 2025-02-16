@@ -23,7 +23,10 @@ client.once('ready', () => {
         const moduleFiles = fs.readdirSync(modulesPath).filter(file => file.endsWith('.js'));
         moduleFiles.forEach(file => {
             try {
-                require(path.join(modulesPath, file))(client);
+                const startModule = require(path.join(modulesPath, file));
+                if (typeof startModule === 'function') {
+                    startModule(client);
+                }
                 console.log(`Loaded module: ${file}`);
             } catch (err) {
                 console.error(`Error loading module ${file}: ${err.message}`);

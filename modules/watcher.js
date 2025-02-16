@@ -60,4 +60,8 @@ const checkPrices = async () => {
 };
 
 // Run the price check at regular intervals (e.g., every hour)
-setInterval(checkPrices, 3600000);
+const startWatcher = () => {
+    setInterval(checkPrices, 3600000);
+};
+
+module.exports = startWatcher;
