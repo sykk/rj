@@ -44,11 +44,11 @@ module.exports = {
             if (subcommand === 'trending') {
                 const response = await axios.get(`https://api.dexscreener.io/latest/dex/tokens/trending?interval=${interval}`);
 
-                if (!response.data || response.data.length === 0) {
+                if (!response.data || !Array.isArray(response.data.topTokens)) {
                     throw new Error('No trending data available');
                 }
 
-                const trendingTokens = response.data.slice(0, 5);
+                const trendingTokens = response.data.topTokens.slice(0, 5);
 
                 const embed = new EmbedBuilder()
                     .setTitle(`Top 5 Trending Tokens (${interval})`)
@@ -61,11 +61,11 @@ module.exports = {
                 const symbol = interaction.options.getString('symbol').toUpperCase();
                 const response = await axios.get(`https://api.dexscreener.io/latest/dex/tokens/${symbol}/trending?interval=${interval}`);
 
-                if (!response.data || response.data.length === 0) {
+                if (!response.data || !Array.isArray(response.data.topTokens)) {
                     throw new Error('No trending data available for this token');
                 }
 
-                const trendingTokens = response.data.slice(0, 5);
+                const trendingTokens = response.data.topTokens.slice(0, 5);
 
                 const embed = new EmbedBuilder()
                     .setTitle(`Top 5 Trending Tokens for ${symbol} (${interval})`)
