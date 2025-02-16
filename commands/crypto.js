@@ -14,7 +14,7 @@ module.exports = {
     async execute(interaction) {
         // Check if the user is an admin
         if (!isAdmin(interaction.user.id)) {
-            return interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
+            return interaction.reply({ content: 'You do not have permission to use this command.', flags: 64 });
         }
 
         const symbol = interaction.options.getString('symbol').toUpperCase();
@@ -31,7 +31,7 @@ module.exports = {
 
             // Fetch 7-day historical data for the chart
             // Assuming Dexscreener API provides historical data (if not, you need to adjust the logic accordingly)
-            const historyResponse = await axios.get(`https://api.dexscreener.com/latest/dex/pairs/${cryptoData.id}/chart`, {
+            const historyResponse = await axios.get(`https://api.dexscreener.com/latest/dex/pairs/${symbol}/chart`, {
                 params: {
                     interval: '1d',
                     limit: 7,
@@ -64,7 +64,7 @@ module.exports = {
             await interaction.reply({ embeds: [embed] });
         } catch (error) {
             console.error(`Error fetching cryptocurrency data: ${error.message}`);
-            await interaction.reply({ content: 'There was an error fetching the cryptocurrency data.', ephemeral: true });
+            await interaction.reply({ content: 'There was an error fetching the cryptocurrency data.', flags: 64 });
         }
     },
 };

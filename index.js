@@ -71,7 +71,7 @@ client.on('interactionCreate', async interaction => {
         await command.execute(interaction);
     } catch (error) {
         console.error(`Error executing command ${interaction.commandName}: ${error.message}`);
-        await interaction.reply({ content: 'There was an error executing that command!', ephemeral: true });
+        await interaction.reply({ content: 'There was an error executing that command!', flags: 64 });
     }
 });
 
