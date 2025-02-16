@@ -33,20 +33,23 @@ module.exports = {
             const change24h = priceData.usd_24h_change || 0;
             const last7Days = sparklineData.map(entry => entry[1]);
 
-            const graphData = last7Days.join(',');
-
-            // Ensure the URL length is within the limit and properly encoded
-            const chartUrl = `https://quickchart.io/chart?c=${encodeURIComponent(JSON.stringify({
+            // Create a concise chart configuration
+            const chartConfig = {
                 type: 'line',
                 data: {
                     labels: last7Days.map((_, index) => `${7 - index}d`),
                     datasets: [{
                         label: `${crypto.toUpperCase()} price`,
-                        data: last7Days
+                        data: last7Days,
+                        fill: false,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        tension: 0.1
                     }]
                 }
-            }))}`;
+            };
+            const chartUrl = `https://quickchart.io/chart?c=${encodeURIComponent(JSON.stringify(chartConfig))}`;
 
+            // Ensure the URL length is within the limit
             if (chartUrl.length > 2048) {
                 console.error('Chart URL is too long.');
                 await interaction.reply('The chart URL generated is too long. Please try again with a different cryptocurrency symbol.');
