@@ -25,6 +25,11 @@ module.exports = {
             const change24h = data.market_data.price_change_percentage_24h_in_currency.usd || 0;
             const sparkline = data.market_data.sparkline_7d.price;
 
+            if (!sparkline) {
+                await interaction.reply('Could not retrieve the sparkline data. Please try again later.');
+                return;
+            }
+
             const graphData = sparkline.join(',');
 
             const embed = new EmbedBuilder()
