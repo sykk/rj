@@ -10,13 +10,19 @@ module.exports = {
     async execute(interaction) {
         const crypto = interaction.options.getString('symbol').toLowerCase();
         const url = `https://api.coingecko.com/api/v3/coins/${crypto}`;
-        
+
         try {
             const response = await axios.get(url);
+
+            if (!response.data || !response.data.market_data) {
+                await interaction.reply('Could not retrieve the details. Please check the cryptocurrency symbol and try again.');
+                return;
+            }
+
             const data = response.data;
             const price = data.market_data.current_price.usd;
-            const change1h = data.market_data.price_change_percentage_1h_in_currency.usd;
-            const change24h = data.market_data.price_change_percentage_24h_in_currency.usd;
+            const change1h = data.market_data.price_change_percentage_1h_in_currency.usd || 0;
+            const change24h = data.market_data.price_change_percentage_24h_in_currency.usd || 0;
             const sparkline = data.market_data.sparkline_7d.price;
 
             const graphData = sparkline.join(',');
@@ -35,7 +41,7 @@ module.exports = {
             await interaction.reply({ embeds: [embed] });
         } catch (error) {
             console.error(`Error fetching cryptocurrency details: ${error.message}`);
-            await interaction.reply('Could not retrieve the details. Please check the cryptocurrency symbol and try again.');
+            await interaction.reply('There was an error trying to fetch the cryptocurrency details.');
         }
     },
 };
