@@ -35,6 +35,10 @@ module.exports = {
 
             const graphData = last7Days.join(',');
 
+            // Ensure the URL length is within the limit
+            const chartUrl = `https://quickchart.io/chart?c={type:'line',data:{labels:[${sparklineData.map((_, index) => `'${7 - index}d'`).join(',')}],datasets:[{label:'${crypto.toUpperCase()} price',data:[${graphData}]}]}}`;
+            const truncatedChartUrl = chartUrl.length > 2048 ? chartUrl.slice(0, 2048) : chartUrl;
+
             const embed = new EmbedBuilder()
                 .setTitle('Cryptocurrency Price')
                 .setDescription(`Details for ${crypto.toUpperCase()}`)
@@ -42,7 +46,7 @@ module.exports = {
                     { name: 'Price', value: `$${price} USD`, inline: true },
                     { name: 'Change (24h)', value: `${change24h.toFixed(2)}%`, inline: true }
                 )
-                .setImage(`https://quickchart.io/chart?c={type:'line',data:{labels:[${sparklineData.map((_, index) => `'${7 - index}d'`).join(',')}],datasets:[{label:'${crypto.toUpperCase()} price',data:[${graphData}]}]}}`)
+                .setImage(truncatedChartUrl)
                 .setColor(0x00AE86);
 
             await interaction.reply({ embeds: [embed] });
