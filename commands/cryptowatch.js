@@ -2,6 +2,7 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 const { EmbedBuilder } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
+const axios = require('axios');
 require('dotenv').config();
 
 const watchlistPath = path.join(__dirname, 'watchlist.json');
@@ -29,7 +30,7 @@ module.exports = {
                 .setDescription('Add a cryptocurrency to your watchlist')
                 .addStringOption(option => 
                     option.setName('symbol')
-                          .setDescription('The cryptocurrency symbol (e.g., btc, eth)')
+                          .setDescription('The cryptocurrency symbol (e.g., BTC, ETH)')
                           .setRequired(true))
                 .addNumberOption(option => 
                     option.setName('percent')
@@ -41,7 +42,7 @@ module.exports = {
                 .setDescription('Delete a cryptocurrency from your watchlist')
                 .addStringOption(option => 
                     option.setName('symbol')
-                          .setDescription('The cryptocurrency symbol (e.g., btc, eth)')
+                          .setDescription('The cryptocurrency symbol (e.g., BTC, ETH)')
                           .setRequired(true)))
         .addSubcommand(subcommand =>
             subcommand
@@ -66,26 +67,26 @@ module.exports = {
     },
 
     async addWatch(interaction) {
-        const crypto = interaction.options.getString('symbol').toLowerCase();
+        const crypto = interaction.options.getString('symbol').toUpperCase();
         const percent = interaction.options.getNumber('percent');
 
         const watchlist = loadWatchlist();
         watchlist.push({ crypto, percent });
         saveWatchlist(watchlist);
 
-        console.debug(`Added ${crypto.toUpperCase()} with alert set for ${percent}% increase.`); // Debug statement
-        await interaction.reply({ content: `Added ${crypto.toUpperCase()} to watchlist with alert set for ${percent}% increase.`, flags: 64 });
+        console.debug(`Added ${crypto} with alert set for ${percent}% increase.`); // Debug statement
+        await interaction.reply({ content: `Added ${crypto} to watchlist with alert set for ${percent}% increase.`, flags: 64 });
     },
 
     async deleteWatch(interaction) {
-        const crypto = interaction.options.getString('symbol').toLowerCase();
+        const crypto = interaction.options.getString('symbol').toUpperCase();
 
         let watchlist = loadWatchlist();
         watchlist = watchlist.filter(item => item.crypto !== crypto);
         saveWatchlist(watchlist);
 
-        console.debug(`Deleted ${crypto.toUpperCase()} from watchlist.`); // Debug statement
-        await interaction.reply({ content: `Deleted ${crypto.toUpperCase()} from watchlist.`, flags: 64 });
+        console.debug(`Deleted ${crypto} from watchlist.`); // Debug statement
+        await interaction.reply({ content: `Deleted ${crypto} from watchlist.`, flags: 64 });
     },
 
     async listWatch(interaction) {
@@ -99,7 +100,7 @@ module.exports = {
 
         const embed = new EmbedBuilder()
         .setTitle('Your Cryptocurrency Watchlist')
-        .setDescription(watchlist.map(item => `${item.crypto.toUpperCase()}: Alert at ${item.percent}% increase`).join('\n'));
+        .setDescription(watchlist.map(item => `${item.crypto}: Alert at ${item.percent}% increase`).join('\n'));
 
         console.debug('Displaying watchlist:', watchlist); // Debug statement
         await interaction.reply({ embeds: [embed], flags: 64 });

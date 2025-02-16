@@ -22,12 +22,12 @@ const saveWatchlist = (watchlist) => {
 // Send alert to Discord
 const sendAlert = async (crypto, percent, currentPercent) => {
     const message = {
-        content: `Alert! ${crypto.toUpperCase()} has increased by ${currentPercent}% (threshold: ${percent}%)`
+        content: `Alert! ${crypto} has increased by ${currentPercent}% (threshold: ${percent}%)`
     };
 
     try {
         await axios.post(webhookUrl, message);
-        console.debug(`Sent alert for ${crypto.toUpperCase()}: ${currentPercent}% increase`); // Debug statement
+        console.debug(`Sent alert for ${crypto}: ${currentPercent}% increase`); // Debug statement
     } catch (error) {
         console.error(`Error sending alert: ${error.message}`);
     }
@@ -41,14 +41,17 @@ const checkPrices = async () => {
         const crypto = item.crypto;
         const percent = item.percent;
 
-        const url = `https://api.coingecko.com/api/v3/simple/price?ids=${crypto}&vs_currencies=usd&include_24hr_change=true`;
+        const url = `https://api.kraken.com/0/public/Ticker?pair=${crypto}USD`;
 
         try {
             const response = await axios.get(url);
-            const priceData = response.data[crypto];
+            const priceData = response.data.result[Object.keys(response.data.result)[0]];
 
-            if (priceData && priceData.usd_24h_change >= percent) {
-                await sendAlert(crypto, percent, priceData.usd_24h_change);
+            if (priceData) {
+                const change24h = ((priceData.c[0] - priceData.o) / priceData.o * 100).toFixed(2); // Assuming 'o' is the opening price for 24h
+                if (change24h >= percent) {
+                    await sendAlert(crypto, percent, change24h);
+                }
             }
         } catch (error) {
             console.error(`Error fetching price for ${crypto}: ${error.message}`);

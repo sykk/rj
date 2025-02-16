@@ -1,9 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { EmbedBuilder } = require('discord.js');
 const axios = require('axios');
-const fs = require('fs');
-const path = require('path');
-require('dotenv').config();
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -13,7 +10,7 @@ module.exports = {
             subcommand
                 .setName('price')
                 .setDescription('Checks the current price and details of a cryptocurrency by symbol')
-                .addStringOption(option => option.setName('symbol').setDescription('The cryptocurrency symbol (e.g., btc, eth)').setRequired(true)))
+                .addStringOption(option => option.setName('symbol').setDescription('The cryptocurrency symbol (e.g., BTC, ETH)').setRequired(true)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('trending')
@@ -35,65 +32,31 @@ module.exports = {
     },
 
     async showPrice(interaction) {
-        const crypto = interaction.options.getString('symbol').toLowerCase();
-        const url = `https://api.coingecko.com/api/v3/simple/price?ids=${crypto}&vs_currencies=usd&include_24hr_change=true`;
-        const sparklineUrl = `https://api.coingecko.com/api/v3/coins/${crypto}/market_chart?vs_currency=usd&days=7`;
+        const crypto = interaction.options.getString('symbol').toUpperCase();
+        const url = `https://api.kraken.com/0/public/Ticker?pair=${crypto}USD`;
 
         try {
-            console.log(`Fetching data for: ${crypto} from CoinGecko API`);
+            console.log(`Fetching data for: ${crypto} from Kraken API`);
 
-            const [priceResponse, sparklineResponse] = await Promise.all([
-                axios.get(url),
-                axios.get(sparklineUrl)
-            ]);
+            const response = await axios.get(url);
 
-            if (!priceResponse.data || !priceResponse.data[crypto]) {
+            if (!response.data || !response.data.result) {
                 console.error('Price data not found or invalid cryptocurrency symbol.');
                 await interaction.reply({ content: 'Could not retrieve the details. Please check the cryptocurrency symbol and try again.', flags: 64 });
                 return;
             }
 
-            const priceData = priceResponse.data[crypto];
-            const sparklineData = sparklineResponse.data.prices;
-
-            const price = priceData.usd;
-            const change24h = priceData.usd_24h_change || 0;
-            const last7Days = sparklineData.map(entry => entry[1]);
-
-            // Optimize chart data to reduce URL length
-            const reducedDataPoints = last7Days.filter((_, index) => index % Math.ceil(last7Days.length / 10) === 0);
-
-            // Create the chart URL using QuickChart
-            const chartConfig = {
-                type: 'line',
-                data: {
-                    labels: reducedDataPoints.map((_, index) => `${7 - index}d`),
-                    datasets: [{
-                        label: `${crypto.toUpperCase()} price`,
-                        data: reducedDataPoints,
-                        fill: false,
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        tension: 0.1
-                    }]
-                }
-            };
-            const chartUrl = `https://quickchart.io/chart?c=${encodeURIComponent(JSON.stringify(chartConfig))}`;
-
-            // Ensure the URL length is within the limit
-            if (chartUrl.length > 2048) {
-                console.error('Chart URL is too long.');
-                await interaction.reply({ content: 'The chart URL generated is too long. Please try again with a different cryptocurrency symbol.', flags: 64 });
-                return;
-            }
+            const priceData = response.data.result[Object.keys(response.data.result)[0]];
+            const price = priceData.c[0];
+            const change24h = ((priceData.c[0] - priceData.o) / priceData.o * 100).toFixed(2); // Assuming 'o' is the opening price for 24h
 
             const embed = new EmbedBuilder()
                 .setTitle('Cryptocurrency Price')
-                .setDescription(`Details for ${crypto.toUpperCase()}`)
+                .setDescription(`Details for ${crypto}`)
                 .addFields(
                     { name: 'Price', value: `$${price} USD`, inline: true },
-                    { name: 'Change (24h)', value: `${change24h.toFixed(2)}%`, inline: true }
+                    { name: 'Change (24h)', value: `${change24h}%`, inline: true }
                 )
-                .setImage(chartUrl)
                 .setColor(0x00AE86);
 
             await interaction.reply({ embeds: [embed], flags: 64 });
@@ -109,36 +72,8 @@ module.exports = {
     },
 
     async showTrending(interaction) {
-        const trendingUrl = 'https://api.coingecko.com/api/v3/search/trending';
-
-        try {
-            console.log('Fetching trending cryptocurrencies from CoinGecko API');
-
-            const response = await axios.get(trendingUrl);
-
-            if (!response.data || !response.data.coins || response.data.coins.length === 0) {
-                console.error('No trending data found.');
-                await interaction.reply({ content: 'Could not retrieve trending cryptocurrencies.', flags: 64 });
-                return;
-            }
-
-            const trendingCoins = response.data.coins.slice(0, 5);
-
-            const embed = new EmbedBuilder()
-                .setTitle('Trending Cryptocurrencies')
-                .setDescription('Top 5 trending cryptocurrencies on CoinGecko')
-                .setColor(0x00AE86);
-
-            trendingCoins.forEach((coin, index) => {
-                embed.addFields(
-                    { name: `${index + 1}. ${coin.item.name} (${coin.item.symbol.toUpperCase()})`, value: `Market Cap Rank: ${coin.item.market_cap_rank}`, inline: false }
-                );
-            });
-
-            await interaction.reply({ embeds: [embed], flags: 64 });
-        } catch (error) {
-            console.error(`Error fetching trending cryptocurrencies: ${error.message}`);
-            await interaction.reply({ content: 'There was an error trying to fetch the trending cryptocurrencies.', flags: 64 });
-        }
+        // Kraken API does not provide a direct endpoint for trending cryptocurrencies
+        // Here we just acknowledge the command as a placeholder
+        await interaction.reply({ content: 'Trending cryptocurrency data is not available via Kraken API.', flags: 64 });
     }
 };
