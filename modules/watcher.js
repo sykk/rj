@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
 
-const watchlistPath = path.join(__dirname, 'commands', 'watchlist.json');
+const watchlistPath = path.join(__dirname, '..', 'commands', 'watchlist.json');
 const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
 
 // Load watchlist from JSON file
