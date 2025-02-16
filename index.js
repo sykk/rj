@@ -17,6 +17,8 @@ for (const file of commandFiles) {
 
 client.once('ready', () => {
     console.log('Bot is ready');
+    // Initialize nod mode functionality
+    require('./modules/nodmode')(client);
 });
 
 client.on('interactionCreate', async interaction => {
