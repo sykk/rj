@@ -10,7 +10,7 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('price')
-                .setDescription('Get the current cryptocurrency price, daily change, daily high, daily low, volume, market cap, and a 24-hour chart')
+                .setDescription('Get the current price, daily change, daily high, daily low, volume, market cap, and 24-hour chart')
                 .addStringOption(option =>
                     option.setName('cryptocurrency')
                         .setDescription('The cryptocurrency symbol (e.g., BTC, ETH)')
