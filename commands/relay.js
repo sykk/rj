@@ -30,8 +30,9 @@ module.exports = {
                 if (discordChannelId) {
                     const discordChannel = client.channels.cache.get(discordChannelId);
                     if (discordChannel) {
-                        discordChannel.send(`**${username}**: ${msg.text}`);
-                        console.log(`Relayed message to Discord channel ID ${discordChannelId}`);
+                        discordChannel.send(`**${username}**: ${msg.text}`)
+                            .then(() => console.log(`Relayed message to Discord channel ID ${discordChannelId}`))
+                            .catch(error => console.error(`Failed to send message to Discord channel ID ${discordChannelId}: ${error.message}`));
                     } else {
                         console.error(`Discord channel ID ${discordChannelId} not found`);
                     }
