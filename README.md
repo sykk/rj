@@ -51,6 +51,10 @@ Deletes a relay pair. Messages from the specified Telegram channel will no longe
 
 Lists all current relay pairs.
 
+### `!echo <message>`
+
+Echoes the user's message.
+
 ## Running the Bot
 
 To run the bot, execute the following command:
@@ -100,6 +104,14 @@ node index.js
     ```
 
     This command lists all current relay pairs.
+
+6. Echo a message:
+
+    ```plaintext
+    !echo Hello, world!
+    ```
+
+    This command echoes the message "Hello, world!".
 
 ## License
 

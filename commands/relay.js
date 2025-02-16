@@ -2,7 +2,7 @@ const TelegramBot = require('node-telegram-bot-api');
 require('dotenv').config();
 
 // List of admin Discord IDs
-const adminIds = ['121400244729544708', 'YOUR_DISCORD_ID_2'];
+const adminIds = ['YOUR_DISCORD_ID_1', 'YOUR_DISCORD_ID_2'];
 
 const telegramBot = new TelegramBot(process.env.TELEGRAM_TOKEN, { polling: true });
 let relayPairs = {};
