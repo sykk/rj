@@ -74,6 +74,7 @@ module.exports = {
         watchlist.push({ crypto, percent });
         saveWatchlist(watchlist);
 
+        console.debug(`Added ${crypto.toUpperCase()} with alert set for ${percent}% increase.`); // Debug statement
         await interaction.reply({ content: `Added ${crypto.toUpperCase()} to watchlist with alert set for ${percent}% increase.`, flags: 64 });
     },
 
@@ -84,6 +85,7 @@ module.exports = {
         watchlist = watchlist.filter(item => item.crypto !== crypto);
         saveWatchlist(watchlist);
 
+        console.debug(`Deleted ${crypto.toUpperCase()} from watchlist.`); // Debug statement
         await interaction.reply({ content: `Deleted ${crypto.toUpperCase()} from watchlist.`, flags: 64 });
     },
 
@@ -91,19 +93,16 @@ module.exports = {
         const watchlist = loadWatchlist();
 
         if (watchlist.length === 0) {
+            console.debug('Watchlist is empty.'); // Debug statement
             await interaction.reply({ content: 'Your watchlist is empty.', flags: 64 });
             return;
         }
 
         const embed = new EmbedBuilder()
-            .setTitle('Cryptocurrency Watchlist')
-            .setDescription('Your current watchlist')
-            .setColor(0x00AE86);
+        .setTitle('Your Cryptocurrency Watchlist')
+        .setDescription(watchlist.map(item => `${item.crypto.toUpperCase()}: Alert at ${item.percent}% increase`).join('\n'));
 
-        watchlist.forEach(item => {
-            embed.addFields({ name: item.crypto.toUpperCase(), value: `Alert at ${item.percent}% increase`, inline: false });
-        });
-
+        console.debug('Displaying watchlist:', watchlist); // Debug statement
         await interaction.reply({ embeds: [embed], flags: 64 });
-    },
+    }
 };
