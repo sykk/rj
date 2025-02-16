@@ -1,6 +1,7 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { EmbedBuilder } = require('discord.js');
 const axios = require('axios');
+const isAdmin = require('../utils/isAdmin');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -11,6 +12,11 @@ module.exports = {
                 .setDescription('The cryptocurrency symbol (e.g., BTC, ETH)')
                 .setRequired(true)),
     async execute(interaction) {
+        // Check if the user is an admin
+        if (!isAdmin(interaction.user.id)) {
+            return interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
+        }
+
         const symbol = interaction.options.getString('symbol').toUpperCase();
 
         try {
