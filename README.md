@@ -1,23 +1,34 @@
-# Discord-Telegram Relay Bot
+# RJ Bot
 
-This is a modular Discord bot built using JavaScript and the discord.js library. The bot can relay messages from a specified Telegram channel to a specified Discord channel using simple commands, search Google, check cryptocurrency prices, and more.
+**RJ Bot** is an AI-powered bot designed to manage various tasks and provide functionalities for different platforms. This bot is built using JavaScript and leverages several libraries and APIs to offer a seamless experience.
 
-## Setup
+## Features
 
-1. Clone the repository:
+- Manage cryptocurrency watchlists and alerts
+- Interact with users through Discord commands
+- Fetch and display real-time cryptocurrency data
+- Store and manage user preferences and settings
+
+## Installation
+
+To get started with RJ Bot, follow these steps:
+
+1. **Clone the repository:**
 
     ```bash
-    git clone https://github.com/yourusername/discord-telegram-bot.git
-    cd discord-telegram-bot
+    git clone https://github.com/sykk/rj.git
+    cd rj
     ```
 
-2. Install the required dependencies:
+2. **Install dependencies:**
 
     ```bash
     npm install
     ```
 
-3. Create a `.env` file in the root directory and add the following environment variables:
+3. **Set up environment variables:**
+
+    Create a `.env` file in the root directory and add the following environment variables:
 
     ```plaintext
     DISCORD_TOKEN=your_discord_bot_token
@@ -28,18 +39,22 @@ This is a modular Discord bot built using JavaScript and the discord.js library.
     RJ_CHANNEL_ID=your_discord_channel_id
     CLIENT_ID=your_discord_client_id
     GUILD_ID=your_discord_guild_id
+    WATCH_CHANNEL_ID=your_watch_channel_id
     ```
 
-4. Replace the placeholder values with your actual tokens, IDs, and keys.
+    Replace the placeholder values with your actual tokens, IDs, and keys.
 
-## Running the Bot
+4. **Run the bot:**
 
-To run the bot, execute the following command:
+    ```bash
+    npm start
+    ```
 
-```bash
-node index.js
-```
+## Contributing
+
+We welcome contributions to enhance RJ Bot. If you'd like to contribute, please fork the repository and create a pull request with your changes.
 
 ## License
 
 This project is licensed under the MIT License.
+```` ▋
