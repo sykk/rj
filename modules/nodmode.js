@@ -1,44 +1,54 @@
-const ACTIVE_NICKNAME = "rj :rj:";
-const NOD_NICKNAME = "rj :rjnod:";
-const INACTIVITY_THRESHOLD = 15 * 60 * 1000; // 15 minutes in milliseconds
+const { Client, GatewayIntentBits } = require('discord.js');
+require('dotenv').config();
+const fs = require('fs');
+const path = require('path');
 
-let lastActiveTime = Date.now();
-let isNodMode = false;
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] });
 
-module.exports = (client) => {
-    client.on("ready", () => {
-        setActive(client);
-        setInterval(() => checkInactivity(client), 60 * 1000); // Check inactivity every minute
-    });
+client.once('ready', async () => {
+    console.log(`Logged in as ${client.user.tag}!`);
 
-    client.on("messageCreate", (msg) => {
-        if (isNodMode && msg.content.toLowerCase() === "!wakeup") {
-            setActive(client);
-            msg.channel.send("I'm awake now!");
-        } else if (!isNodMode) {
-            // Reset inactivity timer on any command
-            lastActiveTime = Date.now();
-            // Add your other command handlers here
+    // Change bot's nickname to "rj :rj:" in all guilds
+    const emojiNameRJ = 'rj'; // Replace with your emoji name
+    const emojiIdRJ = '123456789012345678'; // Replace with your emoji ID for :rj:
+    const emojiNameRJNod = 'rjnod'; // Replace with your emoji name for :rjnod:
+    const emojiIdRJNod = '876543210987654321'; // Replace with your emoji ID for :rjnod:
+
+    client.guilds.cache.forEach(async (guild) => {
+        try {
+            const me = guild.members.me || await guild.members.fetch(client.user.id);
+            await me.setNickname(`rj <:${emojiNameRJ}:${emojiIdRJ}>`);
+            console.log(`Nickname set to "rj <:${emojiNameRJ}:${emojiIdRJ}>" in guild: ${guild.name}`);
+        } catch (error) {
+            console.error(`Failed to set nickname in guild: ${guild.name}`, error);
         }
     });
-};
 
-function setActive(client) {
-    if (isNodMode) {
-        client.user.setUsername(ACTIVE_NICKNAME);
-        isNodMode = false;
-    }
+    console.log('Node mode is working correctly.');
+});
+
+// Dynamically read command files and set commands to the client
+client.commands = new Map();
+const commandFiles = fs.readdirSync(path.join(__dirname, 'commands')).filter(file => file.endsWith('.js'));
+
+for (const file of commandFiles) {
+    const command = require(path.join(__dirname, 'commands', file));
+    client.commands.set(command.data.name, command);
 }
 
-function setNodMode(client) {
-    if (!isNodMode) {
-        client.user.setUsername(NOD_NICKNAME);
-        isNodMode = true;
-    }
-}
+client.on('interactionCreate', async interaction => {
+    if (!interaction.isCommand()) return;
 
-function checkInactivity(client) {
-    if (!isNodMode && Date.now() - lastActiveTime >= INACTIVITY_THRESHOLD) {
-        setNodMode(client);
+    const command = client.commands.get(interaction.commandName);
+
+    if (!command) return;
+
+    try {
+        await command.execute(interaction);
+    } catch (error) {
+        console.error(error);
+        await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
     }
-}
+});
+
+client.login(process.env.DISCORD_TOKEN);

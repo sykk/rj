@@ -42,34 +42,36 @@ module.exports = {
 
         try {
             if (subcommand === 'trending') {
-                const response = await axios.get(`https://api.dexscreener.io/latest/dex/tokens/trending?interval=${interval}`);
+                const response = await axios.get(`https://api.dexscreener.com/latest/dex/trending?interval=${interval}`);
+                console.log(response.data); // Log the response data for debugging
+                
+                const trendingTokens = response.data.pairs || [];
 
-                if (!response.data || !Array.isArray(response.data.topTokens)) {
+                if (trendingTokens.length === 0) {
                     throw new Error('No trending data available');
                 }
 
-                const trendingTokens = response.data.topTokens.slice(0, 5);
-
                 const embed = new EmbedBuilder()
                     .setTitle(`Top 5 Trending Tokens (${interval})`)
-                    .setDescription(trendingTokens.map((token, index) => `${index + 1}. ${token.symbol} (${token.change}%)`).join('\n'))
+                    .setDescription(trendingTokens.slice(0, 5).map((token, index) => `${index + 1}. ${token.baseToken.symbol} (${token.priceChange.percent})`).join('\n'))
                     .setColor(0x00AE86);
 
                 await interaction.reply({ embeds: [embed] });
 
             } else if (subcommand === 'token') {
                 const symbol = interaction.options.getString('symbol').toUpperCase();
-                const response = await axios.get(`https://api.dexscreener.io/latest/dex/tokens/${symbol}/trending?interval=${interval}`);
+                const response = await axios.get(`https://api.dexscreener.com/latest/dex/tokens/${symbol}/trending?interval=${interval}`);
+                console.log(response.data); // Log the response data for debugging
 
-                if (!response.data || !Array.isArray(response.data.topTokens)) {
+                const trendingTokens = response.data.pairs || [];
+
+                if (trendingTokens.length === 0) {
                     throw new Error('No trending data available for this token');
                 }
 
-                const trendingTokens = response.data.topTokens.slice(0, 5);
-
                 const embed = new EmbedBuilder()
                     .setTitle(`Top 5 Trending Tokens for ${symbol} (${interval})`)
-                    .setDescription(trendingTokens.map((token, index) => `${index + 1}. ${token.symbol} (${token.change}%)`).join('\n'))
+                    .setDescription(trendingTokens.slice(0, 5).map((token, index) => `${index + 1}. ${token.baseToken.symbol} (${token.priceChange.percent})`).join('\n'))
                     .setColor(0x00AE86);
 
                 await interaction.reply({ embeds: [embed] });
