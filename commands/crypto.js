@@ -9,38 +9,37 @@ module.exports = {
         .addStringOption(option => option.setName('symbol').setDescription('The cryptocurrency symbol (e.g., btc, eth)').setRequired(true)),
     async execute(interaction) {
         const crypto = interaction.options.getString('symbol').toLowerCase();
-        const url = `https://api.coingecko.com/api/v3/coins/${crypto}`;
+        const url = `https://api.coingecko.com/api/v3/simple/price`;
+        const sparklineUrl = `https://api.coingecko.com/api/v3/coins/${crypto}/market_chart`;
 
         try {
-            const response = await axios.get(url);
+            const [priceResponse, sparklineResponse] = await Promise.all([
+                axios.get(url, { params: { ids: crypto, vs_currencies: 'usd', include_24hr_change: 'true' } }),
+                axios.get(sparklineUrl, { params: { vs_currency: 'usd', days: '7' } })
+            ]);
 
-            if (!response.data || !response.data.market_data) {
+            if (!priceResponse.data || !priceResponse.data[crypto]) {
                 await interaction.reply('Could not retrieve the details. Please check the cryptocurrency symbol and try again.');
                 return;
             }
 
-            const data = response.data;
-            const price = data.market_data.current_price.usd;
-            const change1h = data.market_data.price_change_percentage_1h_in_currency.usd || 0;
-            const change24h = data.market_data.price_change_percentage_24h_in_currency.usd || 0;
-            const sparkline = data.market_data.sparkline_7d.price;
+            const priceData = priceResponse.data[crypto];
+            const sparklineData = sparklineResponse.data.prices;
 
-            if (!sparkline) {
-                await interaction.reply('Could not retrieve the sparkline data. Please try again later.');
-                return;
-            }
+            const price = priceData.usd;
+            const change24h = priceData.usd_24h_change || 0;
+            const last7Days = sparklineData.map(entry => entry[1]);
 
-            const graphData = sparkline.join(',');
+            const graphData = last7Days.join(',');
 
             const embed = new EmbedBuilder()
                 .setTitle('Cryptocurrency Price')
-                .setDescription(`Details for ${data.name} (${data.symbol.toUpperCase()})`)
+                .setDescription(`Details for ${crypto.toUpperCase()}`)
                 .addFields(
                     { name: 'Price', value: `$${price} USD`, inline: true },
-                    { name: 'Change (1h)', value: `${change1h.toFixed(2)}%`, inline: true },
                     { name: 'Change (24h)', value: `${change24h.toFixed(2)}%`, inline: true }
                 )
-                .setImage(`https://quickchart.io/chart?c={type:'line',data:{labels:['7d','6d','5d','4d','3d','2d','1d'],datasets:[{label:'${data.name} price',data:[${graphData}]}]}}`)
+                .setImage(`https://quickchart.io/chart?c={type:'line',data:{labels:[${sparklineData.map((_, index) => `'${7 - index}d'`).join(',')}],datasets:[{label:'${crypto.toUpperCase()} price',data:[${graphData}]}]}}`)
                 .setColor(0x00AE86);
 
             await interaction.reply({ embeds: [embed] });

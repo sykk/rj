@@ -21,7 +21,6 @@ for (const file of commandFiles) {
 
 client.once('ready', async () => {
     console.log(`Logged in to Discord as ${client.user.tag}!`);
-    require('./modules/rjSpam')(client);
 
     const commands = client.commands.map(command => command.data.toJSON());
     const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
