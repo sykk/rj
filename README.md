@@ -1,6 +1,6 @@
 # Discord-Telegram Relay Bot
 
-This is a modular Discord bot built using JavaScript. The bot can relay messages from a specified Telegram channel to a specified Discord channel using simple commands.
+This is a modular Discord bot built using JavaScript. The bot can relay messages from a specified Telegram channel to a specified Discord channel using simple commands, search Google, check cryptocurrency prices, and more.
 
 ## Setup
 
@@ -22,11 +22,13 @@ This is a modular Discord bot built using JavaScript. The bot can relay messages
     ```plaintext
     DISCORD_TOKEN=your_discord_bot_token
     TELEGRAM_TOKEN=your_telegram_bot_token
+    GOOGLE_API_KEY=your_google_api_key
+    GOOGLE_CX=your_google_cx
     ```
 
-4. Replace `your_discord_bot_token` and `your_telegram_bot_token` with your actual tokens.
+4. Replace `your_discord_bot_token`, `your_telegram_bot_token`, `your_google_api_key`, and `your_google_cx` with your actual tokens.
 
-5. Update the `adminIds` array in `commands/relay.js` with the Discord IDs of the users who should have permission to use the bot.
+5. Update the `adminIds` array in `commands/relay.js`, `commands/restart.js`, and `commands/google.js` with the Discord IDs of the users who should have permission to use the bot.
 
 ## Commands
 
@@ -54,6 +56,26 @@ Lists all current relay pairs.
 ### `!echo <message>`
 
 Echoes the user's message.
+
+### `!restart`
+
+Restarts the bot.
+
+### `!google <query>`
+
+Searches Google and posts the results.
+
+### `!crypto <symbol>`
+
+Checks the current price of a cryptocurrency.
+
+### `!ping`
+
+Checks the bot's latency.
+
+### `!help`
+
+Lists all available commands.
 
 ## Running the Bot
 
@@ -112,6 +134,46 @@ node index.js
     ```
 
     This command echoes the message "Hello, world!".
+
+7. Restart the bot:
+
+    ```plaintext
+    !restart
+    ```
+
+    This command restarts the bot.
+
+8. Search Google:
+
+    ```plaintext
+    !google Discord bot tutorial
+    ```
+
+    This command searches Google for "Discord bot tutorial" and posts the results.
+
+9. Check cryptocurrency price:
+
+    ```plaintext
+    !crypto BTC
+    ```
+
+    This command checks the current price of Bitcoin (BTC).
+
+10. Check bot latency:
+
+    ```plaintext
+    !ping
+    ```
+
+    This command checks the bot's latency.
+
+11. List all commands:
+
+    ```plaintext
+    !help
+    ```
+
+    This command lists all available commands.
 
 ## License
 
