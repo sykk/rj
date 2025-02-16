@@ -5,9 +5,21 @@ const axios = require('axios');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('crypto')
-        .setDescription('Checks the current price and details of a cryptocurrency')
-        .addStringOption(option => option.setName('symbol').setDescription('The cryptocurrency symbol (e.g., btc, eth)').setRequired(true)),
+        .setDescription('Cryptocurrency related commands')
+        .addSubcommand(subcommand => 
+            subcommand
+                .setName('price')
+                .setDescription('Checks the current price and details of a cryptocurrency')
+                .addStringOption(option => option.setName('symbol').setDescription('The cryptocurrency symbol (e.g., btc, eth)').setRequired(true)))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('trending')
+                .setDescription('Shows the last 5 trending cryptocurrencies')),
     async execute(interaction) {
+        if (interaction.options.getSubcommand() === 'trending') {
+            return this.showTrending(interaction);
+        }
+
         const crypto = interaction.options.getString('symbol').toLowerCase();
         const url = `https://api.coingecko.com/api/v3/simple/price`;
         const sparklineUrl = `https://api.coingecko.com/api/v3/coins/${crypto}/market_chart`;
@@ -75,6 +87,40 @@ module.exports = {
                 console.error(`Error fetching cryptocurrency details: ${error.message}`);
                 await interaction.reply('There was an error trying to fetch the cryptocurrency details.');
             }
+        }
+    },
+
+    async showTrending(interaction) {
+        const trendingUrl = 'https://api.coingecko.com/api/v3/search/trending';
+
+        try {
+            console.log('Fetching trending cryptocurrencies from CoinGecko API');
+
+            const response = await axios.get(trendingUrl);
+
+            if (!response.data || !response.data.coins || response.data.coins.length === 0) {
+                console.error('No trending data found.');
+                await interaction.reply('Could not retrieve trending cryptocurrencies.');
+                return;
+            }
+
+            const trendingCoins = response.data.coins.slice(0, 5);
+
+            const embed = new EmbedBuilder()
+                .setTitle('Trending Cryptocurrencies')
+                .setDescription('Top 5 trending cryptocurrencies on CoinGecko')
+                .setColor(0x00AE86);
+
+            trendingCoins.forEach((coin, index) => {
+                embed.addFields(
+                    { name: `${index + 1}. ${coin.item.name}`, value: `Symbol: ${coin.item.symbol}\nMarket Cap Rank: ${coin.item.market_cap_rank}`, inline: false }
+                );
+            });
+
+            await interaction.reply({ embeds: [embed] });
+        } catch (error) {
+            console.error(`Error fetching trending cryptocurrencies: ${error.message}`);
+            await interaction.reply('There was an error trying to fetch the trending cryptocurrencies.');
         }
     },
 };
