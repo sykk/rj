@@ -9,15 +9,23 @@ const watchlistPath = path.join(__dirname, 'watchlist.json');
 
 // Load watchlist from JSON file
 const loadWatchlist = () => {
-    if (fs.existsSync(watchlistPath)) {
-        return JSON.parse(fs.readFileSync(watchlistPath, 'utf8'));
+    try {
+        if (fs.existsSync(watchlistPath)) {
+            return JSON.parse(fs.readFileSync(watchlistPath, 'utf8'));
+        }
+    } catch (error) {
+        console.error(`Failed to load watchlist: ${error.message}`);
     }
     return [];
 };
 
 // Save watchlist to JSON file
 const saveWatchlist = (watchlist) => {
-    fs.writeFileSync(watchlistPath, JSON.stringify(watchlist, null, 2), 'utf8');
+    try {
+        fs.writeFileSync(watchlistPath, JSON.stringify(watchlist, null, 2), 'utf8');
+    } catch (error) {
+        console.error(`Failed to save watchlist: ${error.message}`);
+    }
 };
 
 module.exports = {
@@ -62,47 +70,62 @@ module.exports = {
             }
         } catch (error) {
             console.error(`Error executing command: ${error.message}`);
-            await interaction.reply({ content: 'There was an error trying to execute the command.', flags: 64 });
+            await interaction.reply({ content: 'There was an error trying to execute the command.', ephemeral: true });
         }
     },
 
     async addWatch(interaction) {
-        const crypto = interaction.options.getString('symbol').toUpperCase();
-        const percent = interaction.options.getNumber('percent');
+        try {
+            const crypto = interaction.options.getString('symbol').toUpperCase();
+            const percent = interaction.options.getNumber('percent');
 
-        const watchlist = loadWatchlist();
-        watchlist.push({ crypto, percent });
-        saveWatchlist(watchlist);
+            const watchlist = loadWatchlist();
+            watchlist.push({ crypto, percent });
+            saveWatchlist(watchlist);
 
-        console.debug(`Added ${crypto} with alert set for ${percent}% increase.`); // Debug statement
-        await interaction.reply({ content: `Added ${crypto} to watchlist with alert set for ${percent}% increase.`, flags: 64 });
+            console.debug(`Added ${crypto} with alert set for ${percent}% increase.`);
+            await interaction.reply({ content: `Added ${crypto} to watchlist with alert set for ${percent}% increase.`, ephemeral: true });
+        } catch (error) {
+            console.error(`Failed to add watch: ${error.message}`);
+            await interaction.reply({ content: 'There was an error adding to the watchlist.', ephemeral: true });
+        }
     },
 
     async deleteWatch(interaction) {
-        const crypto = interaction.options.getString('symbol').toUpperCase();
+        try {
+            const crypto = interaction.options.getString('symbol').toUpperCase();
 
-        let watchlist = loadWatchlist();
-        watchlist = watchlist.filter(item => item.crypto !== crypto);
-        saveWatchlist(watchlist);
+            let watchlist = loadWatchlist();
+            watchlist = watchlist.filter(item => item.crypto !== crypto);
+            saveWatchlist(watchlist);
 
-        console.debug(`Deleted ${crypto} from watchlist.`); // Debug statement
-        await interaction.reply({ content: `Deleted ${crypto} from watchlist.`, flags: 64 });
+            console.debug(`Deleted ${crypto} from watchlist.`);
+            await interaction.reply({ content: `Deleted ${crypto} from watchlist.`, ephemeral: true });
+        } catch (error) {
+            console.error(`Failed to delete watch: ${error.message}`);
+            await interaction.reply({ content: 'There was an error deleting from the watchlist.', ephemeral: true });
+        }
     },
 
     async listWatch(interaction) {
-        const watchlist = loadWatchlist();
+        try {
+            const watchlist = loadWatchlist();
 
-        if (watchlist.length === 0) {
-            console.debug('Watchlist is empty.'); // Debug statement
-            await interaction.reply({ content: 'Your watchlist is empty.', flags: 64 });
-            return;
+            if (watchlist.length === 0) {
+                console.debug('Watchlist is empty.');
+                await interaction.reply({ content: 'Your watchlist is empty.', ephemeral: true });
+                return;
+            }
+
+            const embed = new EmbedBuilder()
+                .setTitle('Your Cryptocurrency Watchlist')
+                .setDescription(watchlist.map(item => `${item.crypto}: Alert at ${item.percent}% increase`).join('\n'));
+
+            console.debug('Displaying watchlist:', watchlist);
+            await interaction.reply({ embeds: [embed], ephemeral: true });
+        } catch (error) {
+            console.error(`Failed to list watch: ${error.message}`);
+            await interaction.reply({ content: 'There was an error listing the watchlist.', ephemeral: true });
         }
-
-        const embed = new EmbedBuilder()
-        .setTitle('Your Cryptocurrency Watchlist')
-        .setDescription(watchlist.map(item => `${item.crypto}: Alert at ${item.percent}% increase`).join('\n'));
-
-        console.debug('Displaying watchlist:', watchlist); // Debug statement
-        await interaction.reply({ embeds: [embed], flags: 64 });
     }
 };
