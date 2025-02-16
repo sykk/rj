@@ -21,15 +21,15 @@ module.exports = {
         }
 
         const crypto = interaction.options.getString('symbol').toLowerCase();
-        const url = `https://api.coingecko.com/api/v3/simple/price`;
-        const sparklineUrl = `https://api.coingecko.com/api/v3/coins/${crypto}/market_chart`;
+        const url = `https://api.coingecko.com/api/v3/simple/price?ids=${crypto}&vs_currencies=usd&include_24hr_change=true`;
+        const sparklineUrl = `https://api.coingecko.com/api/v3/coins/${crypto}/market_chart?vs_currency=usd&days=7`;
 
         try {
             console.log(`Fetching data for: ${crypto} from CoinGecko API`);
 
             const [priceResponse, sparklineResponse] = await Promise.all([
-                axios.get(url, { params: { ids: crypto, vs_currencies: 'usd', include_24hr_change: 'true' } }),
-                axios.get(sparklineUrl, { params: { vs_currency: 'usd', days: '7' } })
+                axios.get(url),
+                axios.get(sparklineUrl)
             ]);
 
             if (!priceResponse.data || !priceResponse.data[crypto]) {
@@ -113,7 +113,7 @@ module.exports = {
 
             trendingCoins.forEach((coin, index) => {
                 embed.addFields(
-                    { name: `${index + 1}. ${coin.item.name}`, value: `Symbol: ${coin.item.symbol}\nMarket Cap Rank: ${coin.item.market_cap_rank}`, inline: false }
+                    { name: `${index + 1}. ${coin.item.name} (${coin.item.symbol.toUpperCase()})`, value: `Market Cap Rank: ${coin.item.market_cap_rank}`, inline: false }
                 );
             });
 
