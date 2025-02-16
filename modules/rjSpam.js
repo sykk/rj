@@ -22,7 +22,7 @@ module.exports = (client) => {
         }
     };
 
-    const getRandomInterval = () => Math.floor(Math.random() * (600000 - 300000 + 1)) + 300000;
+    const getRandomInterval = () => Math.floor(Math.random() * (21600000 - 10800000 + 1)) + 10800000;
 
     const startRJSpam = () => {
         sendRJMessage();
