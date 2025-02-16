@@ -26,6 +26,8 @@ This is a modular Discord bot built using JavaScript. The bot can relay messages
 
 4. Replace `your_discord_bot_token` and `your_telegram_bot_token` with your actual tokens.
 
+5. Update the `adminIds` array in `commands/relay.js` with the Discord IDs of the users who should have permission to use the bot.
+
 ## Commands
 
 ### `!relay start`

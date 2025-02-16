@@ -1,6 +1,9 @@
 const TelegramBot = require('node-telegram-bot-api');
 require('dotenv').config();
 
+// List of admin Discord IDs
+const adminIds = ['YOUR_DISCORD_ID_1', 'YOUR_DISCORD_ID_2'];
+
 const telegramBot = new TelegramBot(process.env.TELEGRAM_TOKEN, { polling: true });
 let relayPairs = {};
 
@@ -12,6 +15,11 @@ module.exports = {
     name: 'relay',
     description: 'Manage relaying messages from Telegram channels to Discord channels',
     execute(message, args, client) {
+        if (!adminIds.includes(message.author.id)) {
+            message.reply('You do not have permission to use this command.');
+            return;
+        }
+
         if (args[0] === 'start') {
             if (Object.keys(relayPairs).length === 0) {
                 message.channel.send('No relay pairs have been added. Use "!relay add discordChannelId telegramChannelId" to add a relay pair.');
