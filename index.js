@@ -1,39 +1,22 @@
-const { Client, GatewayIntentBits, Collection, REST, Routes } = require('discord.js');
 const fs = require('fs');
+const path = require('path');
+const { Client, Intents, Collection } = require('discord.js');
 require('dotenv').config();
 
-const client = new Client({
-    intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent,
-    ]
-});
+const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
+const token = process.env.DISCORD_TOKEN;
 
 client.commands = new Collection();
 
-// Load command files
-const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+const commandFiles = fs.readdirSync(path.join(__dirname, 'commands')).filter(file => file.endsWith('.js'));
+
 for (const file of commandFiles) {
     const command = require(`./commands/${file}`);
     client.commands.set(command.data.name, command);
 }
 
-client.once('ready', async () => {
-    console.log(`Logged in to Discord as ${client.user.tag}!`);
-
-    const commands = client.commands.map(command => command.data.toJSON());
-    const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
-    try {
-        console.log('Started refreshing application (/) commands.');
-        await rest.put(
-            Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID),
-            { body: commands },
-        );
-        console.log('Successfully reloaded application (/) commands.');
-    } catch (error) {
-        console.error(error);
-    }
+client.once('ready', () => {
+    console.log('Bot is ready');
 });
 
 client.on('interactionCreate', async interaction => {
@@ -46,8 +29,8 @@ client.on('interactionCreate', async interaction => {
         await command.execute(interaction);
     } catch (error) {
         console.error(error);
-        await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+        await interaction.reply({ content: 'There was an error executing that command!', ephemeral: true });
     }
 });
 
-client.login(process.env.DISCORD_TOKEN);
+client.login(token);
