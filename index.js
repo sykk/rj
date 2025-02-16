@@ -8,23 +8,26 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBit
 client.once('ready', async () => {
     console.log(`Logged in as ${client.user.tag}!`);
 
-    // Change bot's nickname to "rj :rj:" in all guilds
-    const emojiIdRJ = '552298414533246978'; // ID for :rj:
-    const emojiIdRJNod = '808470552573509632'; // ID for :rjnod:
+    // Change bot's nickname to "rj :smile:" in all guilds
+    const emojiSmile = '😊'; // Unicode for :smile:
+    const emojiFrowning = '☹️'; // Unicode for :frowning:
 
     client.guilds.cache.forEach(async (guild) => {
         try {
             const me = guild.members.me || await guild.members.fetch(client.user.id);
-            const emojiRJ = guild.emojis.cache.get(emojiIdRJ);
-            const emojiRJNod = guild.emojis.cache.get(emojiIdRJNod);
-
-            if (emojiRJ && emojiRJNod) {
-                const nickname = `rj ${emojiRJ.toString()} ${emojiRJNod.toString()}`;
+            const nickname = `rj ${emojiSmile} ${emojiFrowning}`;
+            if (nickname.length <= 32) {
                 await me.setNickname(nickname);
                 console.log(`Nickname set to "${nickname}" in guild: ${guild.name}`);
             } else {
-                console.error(`Failed to find emojis in guild: ${guild.name}`);
-                console.log(`Available emojis in guild ${guild.name}:`, guild.emojis.cache.map(e => e.toString()));
+                console.error(`Nickname too long in guild: ${guild.name}, trying shortened version.`);
+                const shortenedNickname = `rj ${emojiSmile}`;
+                if (shortenedNickname.length <= 32) {
+                    await me.setNickname(shortenedNickname);
+                    console.log(`Nickname set to "${shortenedNickname}" in guild: ${guild.name}`);
+                } else {
+                    console.error(`Even shortened nickname is too long in guild: ${guild.name}.`);
+                }
             }
         } catch (error) {
             console.error(`Failed to set nickname in guild: ${guild.name}`, error);
