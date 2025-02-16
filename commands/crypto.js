@@ -6,7 +6,7 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('crypto')
         .setDescription('Checks the current price and details of a cryptocurrency')
-        .addStringOption(option => option.setName('symbol').setDescription('The cryptocurrency symbol (e.g., BTC, ETH)').setRequired(true)),
+        .addStringOption(option => option.setName('symbol').setDescription('The cryptocurrency symbol (e.g., btc, eth)').setRequired(true)),
     async execute(interaction) {
         const crypto = interaction.options.getString('symbol').toLowerCase();
         const url = `https://api.coingecko.com/api/v3/coins/${crypto}`;
@@ -40,8 +40,12 @@ module.exports = {
 
             await interaction.reply({ embeds: [embed] });
         } catch (error) {
-            console.error(`Error fetching cryptocurrency details: ${error.message}`);
-            await interaction.reply('There was an error trying to fetch the cryptocurrency details.');
+            if (error.response && error.response.status === 404) {
+                await interaction.reply('Could not retrieve the details. Please check the cryptocurrency symbol and try again.');
+            } else {
+                console.error(`Error fetching cryptocurrency details: ${error.message}`);
+                await interaction.reply('There was an error trying to fetch the cryptocurrency details.');
+            }
         }
     },
 };
