@@ -26,9 +26,11 @@ This is a modular Discord bot built using JavaScript and the discord.js library.
     GOOGLE_CX=your_google_cx
     ADMIN_IDS=your_admin_discord_ids_comma_separated
     RJ_CHANNEL_ID=your_discord_channel_id
+    CLIENT_ID=your_discord_client_id
+    GUILD_ID=your_discord_guild_id
     ```
 
-4. Replace `your_discord_bot_token`, `your_telegram_bot_token`, `your_google_api_key`, `your_google_cx`, `your_admin_discord_ids_comma_separated`, and `your_discord_channel_id` with your actual tokens, admin Discord IDs, and the ID of the Discord channel where the bot should send `:rj:` and `:rjnod:` messages.
+4. Replace the placeholder values with your actual tokens, IDs, and keys.
 
 ## Running the Bot
 
@@ -41,4 +43,3 @@ node index.js
 ## License
 
 This project is licensed under the MIT License.
-```` ▋
