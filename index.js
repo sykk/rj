@@ -9,14 +9,23 @@ client.once('ready', async () => {
     console.log(`Logged in as ${client.user.tag}!`);
 
     // Change bot's nickname to "rj :rj:" in all guilds
-    const emojiName = 'rj'; // Replace with your emoji name
-    const emojiId = '552298414533246978'; // Replace with your emoji ID
+    const emojiIdRJ = '552298414533246978'; // ID for :rj:
+    const emojiIdRJNod = '808470552573509632'; // ID for :rjnod:
 
     client.guilds.cache.forEach(async (guild) => {
         try {
             const me = guild.members.me || await guild.members.fetch(client.user.id);
-            await me.setNickname(`rj <:${emojiName}:${emojiId}>`);
-            console.log(`Nickname set to "rj <:${emojiName}:${emojiId}>" in guild: ${guild.name}`);
+            const emojiRJ = guild.emojis.cache.get(emojiIdRJ);
+            const emojiRJNod = guild.emojis.cache.get(emojiIdRJNod);
+
+            if (emojiRJ && emojiRJNod) {
+                const nickname = `rj ${emojiRJ.toString()} ${emojiRJNod.toString()}`;
+                await me.setNickname(nickname);
+                console.log(`Nickname set to "${nickname}" in guild: ${guild.name}`);
+            } else {
+                console.error(`Failed to find emojis in guild: ${guild.name}`);
+                console.log(`Available emojis in guild ${guild.name}:`, guild.emojis.cache.map(e => e.toString()));
+            }
         } catch (error) {
             console.error(`Failed to set nickname in guild: ${guild.name}`, error);
         }
