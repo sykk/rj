@@ -1,18 +1,11 @@
 const axios = require('axios');
 require('dotenv').config();
 
-// List of admin Discord IDs
-const adminIds = ['YOUR_DISCORD_ID_1', 'YOUR_DISCORD_ID_2'];
-
 module.exports = {
     name: 'google',
     description: 'Searches Google and posts the results',
+    adminOnly: true,
     execute(message, args, client) {
-        if (!adminIds.includes(message.author.id)) {
-            message.reply('You do not have permission to use this command.');
-            return;
-        }
-
         const query = args.join(' ');
 
         if (!query) {

@@ -3,6 +3,7 @@ const axios = require('axios');
 module.exports = {
     name: 'crypto',
     description: 'Checks the current price of a cryptocurrency',
+    adminOnly: false,
     execute(message, args, client) {
         const crypto = args[0]?.toUpperCase();
 

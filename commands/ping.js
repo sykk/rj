@@ -1,6 +1,7 @@
 module.exports = {
     name: 'ping',
     description: 'Checks the bot\'s latency',
+    adminOnly: false,
     execute(message, args, client) {
         const sent = Date.now();
         message.channel.send('Pong!').then(reply => {

@@ -24,34 +24,32 @@ This is a modular Discord bot built using JavaScript. The bot can relay messages
     TELEGRAM_TOKEN=your_telegram_bot_token
     GOOGLE_API_KEY=your_google_api_key
     GOOGLE_CX=your_google_cx
+    ADMIN_IDS=your_admin_discord_ids_comma_separated
     ```
 
-4. Replace `your_discord_bot_token`, `your_telegram_bot_token`, `your_google_api_key`, and `your_google_cx` with your actual tokens.
-
-5. Update the `adminIds` array in `commands/relay.js`, `commands/restart.js`, and `commands/google.js` with the Discord IDs of the users who should have permission to use the bot.
+4. Replace `your_discord_bot_token`, `your_telegram_bot_token`, `your_google_api_key`, `your_google_cx`, and `your_admin_discord_ids_comma_separated` with your actual tokens and admin Discord IDs.
 
 ## Commands
 
 ### `!relay start`
 
-Starts relaying messages from the added Telegram channels to the specified Discord channels.
+Starts relaying messages from the added Telegram channels to the specified Discord channels. (Admin only)
 
 ### `!relay stop`
 
-Stops relaying messages.
+Stops relaying messages. (Admin only)
 
 ### `!relay add <discordChannelId> <telegramChannelId>`
 
-Adds a relay pair. Messages from the specified Telegram channel will be relayed to the specified Discord channel.
-This command also confirms the connection to both the Discord and Telegram channels.
+Adds a relay pair. Messages from the specified Telegram channel will be relayed to the specified Discord channel. This command also confirms the connection to both the Discord and Telegram channels. (Admin only)
 
 ### `!relay delete <discordChannelId> <telegramChannelId>`
 
-Deletes a relay pair. Messages from the specified Telegram channel will no longer be relayed to the specified Discord channel.
+Deletes a relay pair. Messages from the specified Telegram channel will no longer be relayed to the specified Discord channel. (Admin only)
 
 ### `!relay list`
 
-Lists all current relay pairs.
+Lists all current relay pairs. (Admin only)
 
 ### `!echo <message>`
 
@@ -59,11 +57,11 @@ Echoes the user's message.
 
 ### `!restart`
 
-Restarts the bot.
+Restarts the bot. (Admin only)
 
 ### `!google <query>`
 
-Searches Google and posts the results.
+Searches Google and posts the results. (Admin only)
 
 ### `!crypto <symbol>`
 

@@ -33,6 +33,11 @@ client.on('messageCreate', message => {
 
     const command = client.commands.get(commandName);
 
+    if (command.adminOnly && !process.env.ADMIN_IDS.split(',').includes(message.author.id)) {
+        message.reply('You do not have permission to use this command.');
+        return;
+    }
+
     try {
         command.execute(message, args, client);
     } catch (error) {
