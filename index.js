@@ -7,33 +7,6 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBit
 
 client.once('ready', async () => {
     console.log(`Logged in as ${client.user.tag}!`);
-
-    // Change bot's nickname to "rj :smile:" in all guilds
-    const emojiSmile = '😊'; // Unicode for :smile:
-    const emojiFrowning = '☹️'; // Unicode for :frowning:
-
-    client.guilds.cache.forEach(async (guild) => {
-        try {
-            const me = guild.members.me || await guild.members.fetch(client.user.id);
-            const nickname = `rj ${emojiSmile} ${emojiFrowning}`;
-            if (nickname.length <= 32) {
-                await me.setNickname(nickname);
-                console.log(`Nickname set to "${nickname}" in guild: ${guild.name}`);
-            } else {
-                console.error(`Nickname too long in guild: ${guild.name}, trying shortened version.`);
-                const shortenedNickname = `rj ${emojiSmile}`;
-                if (shortenedNickname.length <= 32) {
-                    await me.setNickname(shortenedNickname);
-                    console.log(`Nickname set to "${shortenedNickname}" in guild: ${guild.name}`);
-                } else {
-                    console.error(`Even shortened nickname is too long in guild: ${guild.name}.`);
-                }
-            }
-        } catch (error) {
-            console.error(`Failed to set nickname in guild: ${guild.name}`, error);
-        }
-    });
-
     console.log('Node mode is working correctly.');
 });
 
@@ -44,6 +17,15 @@ const commandFiles = fs.readdirSync(path.join(__dirname, 'commands')).filter(fil
 for (const file of commandFiles) {
     const command = require(path.join(__dirname, 'commands', file));
     client.commands.set(command.data.name, command);
+}
+
+// Dynamically read module files and set modules to the client
+client.modules = new Map();
+const moduleFiles = fs.readdirSync(path.join(__dirname, 'modules')).filter(file => file.endsWith('.js'));
+
+for (const file of moduleFiles) {
+    const module = require(path.join(__dirname, 'modules', file));
+    client.modules.set(module.data.name, module);
 }
 
 client.on('interactionCreate', async interaction => {
