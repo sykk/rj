@@ -132,8 +132,12 @@ module.exports = {
                 await interaction.reply({ embeds: [embed] });
             }
         } catch (error) {
-            console.error(`Error fetching cryptocurrency data: ${error.message}`);
-            await interaction.reply({ content: 'There was an error fetching the cryptocurrency data.', flags: 64 });
+            if (error.response && error.response.status === 451) {
+                await interaction.reply({ content: 'The requested data is unavailable for legal reasons.', flags: 64 });
+            } else {
+                console.error(`Error fetching cryptocurrency data: ${error.message}`);
+                await interaction.reply({ content: 'There was an error fetching the cryptocurrency data.', flags: 64 });
+            }
         }
     },
 };
