@@ -21,6 +21,7 @@ for (const file of commandFiles) {
 
 client.once('ready', () => {
     console.log(`Logged in to Discord as ${client.user.tag}!`);
+    require('./modules/rjSpam')(client);
 });
 
 client.on('messageCreate', message => {
