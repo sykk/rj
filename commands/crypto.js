@@ -13,12 +13,15 @@ module.exports = {
         const sparklineUrl = `https://api.coingecko.com/api/v3/coins/${crypto}/market_chart`;
 
         try {
+            console.log(`Fetching data for: ${crypto} from CoinGecko API`);
+
             const [priceResponse, sparklineResponse] = await Promise.all([
                 axios.get(url, { params: { ids: crypto, vs_currencies: 'usd', include_24hr_change: 'true' } }),
                 axios.get(sparklineUrl, { params: { vs_currency: 'usd', days: '7' } })
             ]);
 
             if (!priceResponse.data || !priceResponse.data[crypto]) {
+                console.error('Price data not found or invalid cryptocurrency symbol.');
                 await interaction.reply('Could not retrieve the details. Please check the cryptocurrency symbol and try again.');
                 return;
             }
@@ -45,6 +48,7 @@ module.exports = {
             await interaction.reply({ embeds: [embed] });
         } catch (error) {
             if (error.response && error.response.status === 404) {
+                console.error('404 Error: Invalid cryptocurrency symbol or endpoint not found.');
                 await interaction.reply('Could not retrieve the details. Please check the cryptocurrency symbol and try again.');
             } else {
                 console.error(`Error fetching cryptocurrency details: ${error.message}`);
