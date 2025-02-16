@@ -35,9 +35,23 @@ module.exports = {
 
             const graphData = last7Days.join(',');
 
-            // Ensure the URL length is within the limit
-            const chartUrl = `https://quickchart.io/chart?c={type:'line',data:{labels:[${sparklineData.map((_, index) => `'${7 - index}d'`).join(',')}],datasets:[{label:'${crypto.toUpperCase()} price',data:[${graphData}]}]}}`;
-            const truncatedChartUrl = chartUrl.length > 2048 ? chartUrl.slice(0, 2048) : chartUrl;
+            // Ensure the URL length is within the limit and properly encoded
+            const chartUrl = `https://quickchart.io/chart?c=${encodeURIComponent(JSON.stringify({
+                type: 'line',
+                data: {
+                    labels: last7Days.map((_, index) => `${7 - index}d`),
+                    datasets: [{
+                        label: `${crypto.toUpperCase()} price`,
+                        data: last7Days
+                    }]
+                }
+            }))}`;
+
+            if (chartUrl.length > 2048) {
+                console.error('Chart URL is too long.');
+                await interaction.reply('The chart URL generated is too long. Please try again with a different cryptocurrency symbol.');
+                return;
+            }
 
             const embed = new EmbedBuilder()
                 .setTitle('Cryptocurrency Price')
@@ -46,7 +60,7 @@ module.exports = {
                     { name: 'Price', value: `$${price} USD`, inline: true },
                     { name: 'Change (24h)', value: `${change24h.toFixed(2)}%`, inline: true }
                 )
-                .setImage(truncatedChartUrl)
+                .setImage(chartUrl)
                 .setColor(0x00AE86);
 
             await interaction.reply({ embeds: [embed] });
