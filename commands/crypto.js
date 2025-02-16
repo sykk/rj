@@ -20,29 +20,25 @@ module.exports = {
         const symbol = interaction.options.getString('symbol').toUpperCase();
 
         try {
-            // Fetch current price and percentage changes from CoinGecko
-            const response = await axios.get(`https://api.coingecko.com/api/v3/coins/markets`, {
-                params: {
-                    vs_currency: 'usd',
-                    ids: symbol.toLowerCase(),
-                },
-            });
+            // Fetch current price and percentage changes from Dexscreener
+            const response = await axios.get(`https://api.dexscreener.com/latest/dex/pairs/${symbol}`);
 
-            if (response.data.length === 0) {
+            if (!response.data || !response.data.pairs || response.data.pairs.length === 0) {
                 throw new Error('Invalid cryptocurrency symbol');
             }
 
-            const cryptoData = response.data[0];
+            const cryptoData = response.data.pairs[0];
 
             // Fetch 7-day historical data for the chart
-            const historyResponse = await axios.get(`https://api.coingecko.com/api/v3/coins/${cryptoData.id}/market_chart`, {
+            // Assuming Dexscreener API provides historical data (if not, you need to adjust the logic accordingly)
+            const historyResponse = await axios.get(`https://api.dexscreener.com/latest/dex/pairs/${cryptoData.id}/chart`, {
                 params: {
-                    vs_currency: 'usd',
-                    days: '7',
+                    interval: '1d',
+                    limit: 7,
                 },
             });
 
-            const prices = historyResponse.data.prices.map(price => price[1]);
+            const prices = historyResponse.data.map(price => price.close);
 
             // Generate chart URL using quickchart.io
             const chartUrl = `https://quickchart.io/chart?c={
@@ -60,8 +56,8 @@ module.exports = {
 
             // Create and send the embed
             const embed = new EmbedBuilder()
-                .setTitle(`${cryptoData.name} (${cryptoData.symbol.toUpperCase()})`)
-                .setDescription(`**Current Price:** $${cryptoData.current_price}\n**1 Hour Change:** ${cryptoData.price_change_percentage_1h_in_currency.toFixed(2)}%\n**24 Hour Change:** ${cryptoData.price_change_percentage_24h_in_currency.toFixed(2)}%`)
+                .setTitle(`${cryptoData.baseToken.name} (${cryptoData.baseToken.symbol.toUpperCase()})`)
+                .setDescription(`**Current Price:** $${cryptoData.priceUsd}\n**1 Hour Change:** ${cryptoData.priceChange.h1.toFixed(2)}%\n**24 Hour Change:** ${cryptoData.priceChange.h24.toFixed(2)}%`)
                 .setImage(chartUrl)
                 .setColor(0x00AE86);
 
