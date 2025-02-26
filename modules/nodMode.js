@@ -16,7 +16,7 @@ class NodMode {
 
     startInactivityTimer() {
         this.clearInactivityTimer();
-        this.nodTimeout = setTimeout(() => this.activateNodMode(), this.randomDelay(5, 10) * 60 * 1000);
+        this.nodTimeout = setTimeout(() => this.activateNodMode(), this.randomDelay(1, 2) * 60 * 1000);
     }
 
     clearInactivityTimer() {
