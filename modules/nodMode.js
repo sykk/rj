@@ -19,8 +19,12 @@ class NodMode {
     startInactivityTimer() {
         console.log('[NodMode] Starting inactivity timer...');
         this.clearInactivityTimer();
-        this.nodTimeout = setTimeout(() => this.activateNodMode(), this.randomDelay(1, 2) * 60 * 1000);
-        console.log(`[NodMode] Inactivity timer started with delay of ${this.nodTimeout}ms.`);
+        const delay = 30 * 1000; // 30 seconds in milliseconds
+        this.nodTimeout = setTimeout(() => {
+            console.log(`[NodMode] Inactivity timer expired after ${delay}ms. Activating nod mode...`);
+            this.activateNodMode();
+        }, delay);
+        console.log(`[NodMode] Inactivity timer set for ${delay}ms.`);
     }
 
     clearInactivityTimer() {
