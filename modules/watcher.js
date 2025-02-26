@@ -20,14 +20,14 @@ const saveWatchlist = (watchlist) => {
 };
 
 // Send alert to Discord
-const sendAlert = async (crypto, percent, currentPercent) => {
+const sendAlert = async (crypto, percent, currentPercent, name) => {
     const message = {
-        content: `Alert! ${crypto} has increased by ${currentPercent}% (threshold: ${percent}%)`
+        content: `Alert! ${name} (${crypto}) has increased by ${currentPercent}% (threshold: ${percent}%)`
     };
 
     try {
         await axios.post(webhookUrl, message);
-        console.debug(`Sent alert for ${crypto}: ${currentPercent}% increase`); // Debug statement
+        console.debug(`Sent alert for ${name} (${crypto}): ${currentPercent}% increase`); // Debug statement
     } catch (error) {
         console.error(`Error sending alert: ${error.message}`);
     }
@@ -40,6 +40,7 @@ const checkPrices = async () => {
     for (const item of watchlist) {
         const crypto = item.crypto;
         const percent = item.percent;
+        const name = item.data.name;
 
         const url = `https://api.kraken.com/0/public/Ticker?pair=${crypto}USD`;
 
@@ -50,11 +51,11 @@ const checkPrices = async () => {
             if (priceData) {
                 const change24h = ((priceData.c[0] - priceData.o) / priceData.o * 100).toFixed(2); // Assuming 'o' is the opening price for 24h
                 if (change24h >= percent) {
-                    await sendAlert(crypto, percent, change24h);
+                    await sendAlert(crypto, percent, change24h, name);
                 }
             }
         } catch (error) {
-            console.error(`Error fetching price for ${crypto}: ${error.message}`);
+            console.error(`Error fetching price for ${name} (${crypto}): ${error.message}`);
         }
     }
 };
@@ -64,4 +65,9 @@ const startWatcher = () => {
     setInterval(checkPrices, 3600000);
 };
 
-module.exports = startWatcher;
+module.exports = {
+    startWatcher,
+    data: {
+        name: 'Watcher'
+    }
+};

@@ -2,5 +2,9 @@
   {
     "crypto": "BITCOIN",
     "percent": 30
+  },
+  {
+    "crypto": "SOL",
+    "percent": 0.1
   }
 ]
