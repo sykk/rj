@@ -2,18 +2,18 @@ const { Client, GatewayIntentBits } = require('discord.js');
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
-const { NodMode } = require('./modules/nodMode'); // Import the NodMode module
-const { Watcher } = require('./modules/watcher'); // Import the Watcher module
+
+// Import the startWatcher function
+const startWatcher = require('./modules/watcher');
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] });
 
 client.once('ready', async () => {
     console.log(`Logged in as ${client.user.tag}!`);
-    console.log('Nod mode is working correctly.');
-    // Initialize NodMode
-    new NodMode(client);
-    // Initialize Watcher
-    new Watcher(client);
+    console.log('Node mode is working correctly.');
+
+    // Start the watcher when the client is ready
+    startWatcher();
 });
 
 // Dynamically read command files and set commands to the client
@@ -31,11 +31,7 @@ const moduleFiles = fs.readdirSync(path.join(__dirname, 'modules')).filter(file 
 
 for (const file of moduleFiles) {
     const module = require(path.join(__dirname, 'modules', file));
-    if (module.data && module.data.name) {
-        client.modules.set(module.data.name, module);
-    } else {
-        console.warn(`Module at ${file} is missing a data property or data.name property`);
-    }
+    client.modules.set(module.data.name, module);
 }
 
 client.on('interactionCreate', async interaction => {
