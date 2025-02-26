@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('@discordjs/builders');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const axios = require('axios');
 const isAdmin = require('../utils/isAdmin');
 
@@ -13,7 +13,7 @@ module.exports = {
     async execute(interaction) {
         // Check if the user is an admin
         if (!isAdmin(interaction.user.id)) {
-            return interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
+            return interaction.reply({ content: 'You do not have permission to use this command.', flags: MessageFlags.EPHEMERAL });
         }
 
         const symbol = interaction.options.getString('symbol').toUpperCase();
@@ -34,11 +34,11 @@ module.exports = {
                 .setDescription(`**Current Price:** $${cryptoData.amount}`)
                 .setColor(0x00AE86);
 
-            await interaction.reply({ embeds: [embed] });
+            await interaction.reply({ embeds: [embed], flags: MessageFlags.EPHEMERAL });
         } catch (error) {
             console.error(`Error fetching cryptocurrency data: ${error.message}`);
             try {
-                await interaction.reply({ content: 'There was an error fetching the cryptocurrency data.', ephemeral: true });
+                await interaction.reply({ content: 'There was an error fetching the cryptocurrency data.', flags: MessageFlags.EPHEMERAL });
             } catch (replyError) {
                 console.error('Failed to send reply:', replyError);
             }

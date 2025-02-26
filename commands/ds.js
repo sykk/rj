@@ -28,14 +28,14 @@ module.exports = {
                         .setRequired(true))),
     async execute(interaction) {
         if (!isAdmin(interaction.user.id)) {
-            return interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
+            return interaction.reply({ content: 'You do not have permission to use this command.', flags: MessageFlags.EPHEMERAL });
         }
 
         const subcommand = interaction.options.getSubcommand();
         const interval = interaction.options.getString('interval').toLowerCase();
 
         if (!['5m', '1h', '6h'].includes(interval)) {
-            return interaction.reply({ content: 'Invalid interval. Please use one of the following: 5m, 1h, 6h.', ephemeral: true });
+            return interaction.reply({ content: 'Invalid interval. Please use one of the following: 5m, 1h, 6h.', flags: MessageFlags.EPHEMERAL });
         }
 
         try {
@@ -73,7 +73,7 @@ module.exports = {
         } catch (error) {
             console.error(`Error fetching trending data: ${error.message}`);
             try {
-                await interaction.reply({ content: 'There was an error fetching the trending data.', ephemeral: true });
+                await interaction.reply({ content: 'There was an error fetching the trending data.', flags: MessageFlags.EPHEMERAL });
             } catch (replyError) {
                 console.error('Failed to send reply:', replyError);
             }
