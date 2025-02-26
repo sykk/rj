@@ -25,7 +25,11 @@ const moduleFiles = fs.readdirSync(path.join(__dirname, 'modules')).filter(file 
 
 for (const file of moduleFiles) {
     const module = require(path.join(__dirname, 'modules', file));
-    client.modules.set(module.data.name, module);
+    if (module && module.data && module.data.name) {
+        client.modules.set(module.data.name, module);
+    } else {
+        console.error(`Module ${file} is missing the 'data' property or 'data.name'`);
+    }
 }
 
 client.on('interactionCreate', async interaction => {
