@@ -24,7 +24,11 @@ const commandFiles = fs.readdirSync(path.join(__dirname, 'commands')).filter(fil
 
 for (const file of commandFiles) {
     const command = require(path.join(__dirname, 'commands', file));
-    client.commands.set(command.data.name, command);
+    if (command.data && command.data.name) {
+        client.commands.set(command.data.name, command);
+    } else {
+        console.warn(`Command '${file}' does not have a 'data' property or 'name'.`);
+    }
 }
 
 // Dynamically read module files and set modules to the client
