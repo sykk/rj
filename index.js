@@ -3,8 +3,8 @@ require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 
-// Import the startWatcher function
-const startWatcher = require('./modules/watcher');
+// Import the Watcher class
+const Watcher = require('./modules/watcher');
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] });
 
@@ -12,8 +12,9 @@ client.once('ready', async () => {
     console.log(`Logged in as ${client.user.tag}!`);
     console.log('Node mode is working correctly.');
 
-    // Start the watcher when the client is ready
-    startWatcher();
+    // Instantiate and start the watcher when the client is ready
+    const watcher = new Watcher();
+    watcher.start();
 });
 
 // Dynamically read command files and set commands to the client
@@ -31,7 +32,11 @@ const moduleFiles = fs.readdirSync(path.join(__dirname, 'modules')).filter(file 
 
 for (const file of moduleFiles) {
     const module = require(path.join(__dirname, 'modules', file));
-    client.modules.set(module.data.name, module);
+    if (module.data && module.data.name) {
+        client.modules.set(module.data.name, module);
+    } else {
+        console.warn(`Module '${file}' does not have a 'data' property.`);
+    }
 }
 
 client.on('interactionCreate', async interaction => {
