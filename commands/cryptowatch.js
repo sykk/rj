@@ -1,13 +1,9 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { EmbedBuilder } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
-const axios = require('axios');
-require('dotenv').config();
-
+const { EmbedBuilder } = require('discord.js');
 const watchlistPath = path.join(__dirname, 'watchlist.json');
 
-// Load watchlist from JSON file
 const loadWatchlist = () => {
     try {
         if (fs.existsSync(watchlistPath)) {
@@ -19,7 +15,6 @@ const loadWatchlist = () => {
     return [];
 };
 
-// Save watchlist to JSON file
 const saveWatchlist = (watchlist) => {
     try {
         fs.writeFileSync(watchlistPath, JSON.stringify(watchlist, null, 2), 'utf8');
@@ -112,20 +107,8 @@ module.exports = {
             const watchlist = loadWatchlist();
 
             if (watchlist.length === 0) {
-                console.debug('Watchlist is empty.');
-                await interaction.reply({ content: 'Your watchlist is empty.', ephemeral: true });
-                return;
-            }
-
-            const embed = new EmbedBuilder()
-                .setTitle('Your Cryptocurrency Watchlist')
-                .setDescription(watchlist.map(item => `${item.crypto}: Alert at ${item.percent}% increase`).join('\n'));
-
-            console.debug('Displaying watchlist:', watchlist);
-            await interaction.reply({ embeds: [embed], ephemeral: true });
-        } catch (error) {
-            console.error(`Failed to list watch: ${error.message}`);
-            await interaction.reply({ content: 'There was an error listing the watchlist.', ephemeral: true });
-        }
-    }
-};
+                await interaction.reply({ content: 'Watchlist is empty.', ephemeral: true });
+            } else {
+                const embed = new EmbedBuilder()
+                    .setTitle('Current Watchlist')
+                    .setDescription(watchlist.map(item

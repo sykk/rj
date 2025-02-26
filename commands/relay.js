@@ -1,67 +1,63 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { EmbedBuilder } = require('discord.js');
-const TelegramBot = require('node-telegram-bot-api');
-require('dotenv').config();
-
-const telegramBot = new TelegramBot(process.env.TELEGRAM_TOKEN, { polling: true });
-let relayPairs = {};
-
-telegramBot.on('polling_error', (error) => {
-    console.error(`Telegram polling error: ${error.code} - ${error.message}`);
-});
+const telegramBot = require('../utils/telegramBot');
+const relayPairs = {};
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('relay')
-        .setDescription('Manage relaying messages from Telegram channels to Discord channels')
+        .setDescription('Manage relays between Discord and Telegram')
         .addSubcommand(subcommand =>
             subcommand
                 .setName('start')
-                .setDescription('Start relaying messages'))
+                .setDescription('Start the relay'))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('stop')
-                .setDescription('Stop relaying messages'))
+                .setDescription('Stop the relay'))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('add')
                 .setDescription('Add a relay pair')
-                .addStringOption(option => option.setName('discordchannelid').setDescription('The Discord channel ID').setRequired(true))
-                .addStringOption(option => option.setName('telegramchannelid').setDescription('The Telegram channel ID').setRequired(true)))
+                .addStringOption(option =>
+                    option.setName('discordchannelid')
+                        .setDescription('The Discord channel ID')
+                        .setRequired(true))
+                .addStringOption(option =>
+                    option.setName('telegramchannelid')
+                        .setDescription('The Telegram channel ID')
+                        .setRequired(true)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('delete')
                 .setDescription('Delete a relay pair')
-                .addStringOption(option => option.setName('discordchannelid').setDescription('The Discord channel ID').setRequired(true))
-                .addStringOption(option => option.setName('telegramchannelid').setDescription('The Telegram channel ID').setRequired(true)))
+                .addStringOption(option =>
+                    option.setName('discordchannelid')
+                        .setDescription('The Discord channel ID')
+                        .setRequired(true))
+                .addStringOption(option =>
+                    option.setName('telegramchannelid')
+                        .setDescription('The Telegram channel ID')
+                        .setRequired(true)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('list')
                 .setDescription('List all relay pairs')),
     async execute(interaction) {
+        const subcommand = interaction.options.getSubcommand();
+
         try {
-            const subcommand = interaction.options.getSubcommand();
-
             if (subcommand === 'start') {
-                if (Object.keys(relayPairs).length === 0) {
-                    await interaction.reply('No relay pairs have been added. Use `/relay add` to add a relay pair.');
-                    return;
-                }
-
-                await interaction.reply('Relay started. Listening to Telegram channels...');
-                console.log('Relay started. Listening to Telegram channels...');
-
-                telegramBot.on('message', (msg) => {
-                    const telegramChannelId = msg.chat.id.toString();
+                await interaction.reply('Relay started.');
+                console.log('Relay started.');
+                telegramBot.on('message', async message => {
+                    const telegramChannelId = message.chat.id;
                     const discordChannelId = relayPairs[telegramChannelId];
-                    const username = msg.from.username || `${msg.from.first_name} ${msg.from.last_name}` || 'Unknown User';
-                    console.log(`Received message from Telegram channel ID ${telegramChannelId} by ${username}: ${msg.text}`);
 
                     if (discordChannelId) {
                         const discordChannel = interaction.client.channels.cache.get(discordChannelId);
                         if (discordChannel) {
-                            discordChannel.send(`**${username}**: ${msg.text}`)
-                                .then(() => console.log(`Relayed message to Discord channel ID ${discordChannelId}`))
+                            discordChannel.send(message.text)
                                 .catch(error => console.error(`Failed to send message to Discord channel ID ${discordChannelId}: ${error.message}`));
                         } else {
                             console.error(`Discord channel ID ${discordChannelId} not found`);
@@ -82,7 +78,6 @@ module.exports = {
                 await interaction.reply(`Relay pair added: Discord Channel ID ${discordChannelId} <-> Telegram Channel ID ${telegramChannelId}`);
                 console.log(`Relay pair added: Discord Channel ID ${discordChannelId} <-> Telegram Channel ID ${telegramChannelId}`);
 
-                // Confirm connection to Discord channel
                 const discordChannel = interaction.client.channels.cache.get(discordChannelId);
                 if (discordChannel) {
                     await interaction.followUp(`Connected to Discord channel ID ${discordChannelId}`);
@@ -92,7 +87,6 @@ module.exports = {
                     console.error(`Failed to connect to Discord channel ID ${discordChannelId}`);
                 }
 
-                // Confirm connection to Telegram channel
                 telegramBot.getChat(telegramChannelId).then(chat => {
                     interaction.followUp(`Connected to Telegram channel ID ${telegramChannelId}`);
                     console.log(`Connected to Telegram channel ID ${telegramChannelId}`);

@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { EmbedBuilder } = require('discord.js');
 const axios = require('axios');
+const { EmbedBuilder } = require('discord.js');
 const isAdmin = require('../utils/isAdmin');
 
 module.exports = {
@@ -28,23 +28,20 @@ module.exports = {
                         .setDescription('Time interval for trending tokens (5m, 1h, 6h)')
                         .setRequired(true))),
     async execute(interaction) {
-        // Check if the user is an admin
         if (!isAdmin(interaction.user.id)) {
-            return interaction.reply({ content: 'You do not have permission to use this command.', flags: 64 });
+            return interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
         }
 
         const subcommand = interaction.options.getSubcommand();
         const interval = interaction.options.getString('interval').toLowerCase();
 
         if (!['5m', '1h', '6h'].includes(interval)) {
-            return interaction.reply({ content: 'Invalid interval. Please use one of the following: 5m, 1h, 6h.', flags: 64 });
+            return interaction.reply({ content: 'Invalid interval. Please use one of the following: 5m, 1h, 6h.', ephemeral: true });
         }
 
         try {
             if (subcommand === 'trending') {
                 const response = await axios.get(`https://api.dexscreener.com/latest/dex/trending?interval=${interval}`);
-                console.log(response.data); // Log the response data for debugging
-                
                 const trendingTokens = response.data.pairs || [];
 
                 if (trendingTokens.length === 0) {
@@ -61,8 +58,6 @@ module.exports = {
             } else if (subcommand === 'token') {
                 const symbol = interaction.options.getString('symbol').toUpperCase();
                 const response = await axios.get(`https://api.dexscreener.com/latest/dex/tokens/${symbol}/trending?interval=${interval}`);
-                console.log(response.data); // Log the response data for debugging
-
                 const trendingTokens = response.data.pairs || [];
 
                 if (trendingTokens.length === 0) {
@@ -78,7 +73,7 @@ module.exports = {
             }
         } catch (error) {
             console.error(`Error fetching trending data: ${error.message}`);
-            await interaction.reply({ content: 'There was an error fetching the trending data.', flags: 64 });
+            await interaction.reply({ content: 'There was an error fetching the trending data.', ephemeral: true });
         }
     },
 };
