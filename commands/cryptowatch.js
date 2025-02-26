@@ -3,32 +3,32 @@ const { loadWatchlist, saveWatchlist } = require('../utils/watchlist');
 
 module.exports = {
     data: new SlashCommandBuilder()
-    .setName('cryptowatch')
-    .setDescription('Manage your cryptocurrency watchlist')
-    .addSubcommand(subcommand =>
-    subcommand
-    .setName('add')
-    .setDescription('Add a cryptocurrency to your watchlist')
-    .addStringOption(option =>
-    option.setName('symbol')
-    .setDescription('The cryptocurrency symbol (e.g., BTC, ETH)')
-    .setRequired(true))
-    .addNumberOption(option =>
-    option.setName('percent')
-    .setDescription('The percentage increase to alert for')
-    .setRequired(true)))
-    .addSubcommand(subcommand =>
-    subcommand
-    .setName('delete')
-    .setDescription('Delete a cryptocurrency from your watchlist')
-    .addStringOption(option =>
-    option.setName('symbol')
-    .setDescription('The cryptocurrency symbol (e.g., BTC, ETH)')
-    .setRequired(true)))
-    .addSubcommand(subcommand =>
-    subcommand
-    .setName('list')
-    .setDescription('List your watchlist')),
+        .setName('cryptowatch')
+        .setDescription('Manage your cryptocurrency watchlist')
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('add')
+                .setDescription('Add a cryptocurrency to your watchlist')
+                .addStringOption(option =>
+                    option.setName('symbol')
+                        .setDescription('The cryptocurrency symbol (e.g., BTC, ETH)')
+                        .setRequired(true))
+                .addNumberOption(option =>
+                    option.setName('percent')
+                        .setDescription('The percentage increase to alert for')
+                        .setRequired(true)))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('delete')
+                .setDescription('Delete a cryptocurrency from your watchlist')
+                .addStringOption(option =>
+                    option.setName('symbol')
+                        .setDescription('The cryptocurrency symbol (e.g., BTC, ETH)')
+                        .setRequired(true)))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('list')
+                .setDescription('List your watchlist')),
     async execute(interaction) {
         try {
             const subcommand = interaction.options.getSubcommand();
@@ -43,7 +43,11 @@ module.exports = {
             }
         } catch (error) {
             console.error(`Error executing command: ${error.message}`);
-            await interaction.reply({ content: 'There was an error trying to execute the command.', ephemeral: true });
+            try {
+                await interaction.reply({ content: 'There was an error trying to execute the command.', ephemeral: true });
+            } catch (replyError) {
+                console.error('Failed to send reply:', replyError);
+            }
         }
     },
 
@@ -60,7 +64,11 @@ module.exports = {
             await interaction.reply({ content: `Added ${crypto} to watchlist with alert set for ${percent}% increase.`, ephemeral: true });
         } catch (error) {
             console.error(`Failed to add watch: ${error.message}`);
-            await interaction.reply({ content: 'There was an error adding to the watchlist.', ephemeral: true });
+            try {
+                await interaction.reply({ content: 'There was an error adding to the watchlist.', ephemeral: true });
+            } catch (replyError) {
+                console.error('Failed to send reply:', replyError);
+            }
         }
     },
 
@@ -76,7 +84,11 @@ module.exports = {
             await interaction.reply({ content: `Deleted ${crypto} from watchlist.`, ephemeral: true });
         } catch (error) {
             console.error(`Failed to delete watch: ${error.message}`);
-            await interaction.reply({ content: 'There was an error deleting from the watchlist.', ephemeral: true });
+            try {
+                await interaction.reply({ content: 'There was an error deleting from the watchlist.', ephemeral: true });
+            } catch (replyError) {
+                console.error('Failed to send reply:', replyError);
+            }
         }
     },
 
@@ -91,14 +103,18 @@ module.exports = {
             }
 
             const embed = new EmbedBuilder()
-            .setTitle('Your Cryptocurrency Watchlist')
-            .setDescription(watchlist.map(item => `${item.crypto}: Alert at ${item.percent}% increase`).join('\n'));
+                .setTitle('Your Cryptocurrency Watchlist')
+                .setDescription(watchlist.map(item => `${item.crypto}: Alert at ${item.percent}% increase`).join('\n'));
 
             console.debug('Displaying watchlist:', watchlist);
             await interaction.reply({ embeds: [embed], ephemeral: true });
         } catch (error) {
             console.error(`Failed to list watch: ${error.message}`);
-            await interaction.reply({ content: 'There was an error listing the watchlist.', ephemeral: true });
+            try {
+                await interaction.reply({ content: 'There was an error listing the watchlist.', ephemeral: true });
+            } catch (replyError) {
+                console.error('Failed to send reply:', replyError);
+            }
         }
     }
 };

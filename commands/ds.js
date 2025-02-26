@@ -72,7 +72,11 @@ module.exports = {
             }
         } catch (error) {
             console.error(`Error fetching trending data: ${error.message}`);
-            await interaction.reply({ content: 'There was an error fetching the trending data.', ephemeral: true });
+            try {
+                await interaction.reply({ content: 'There was an error fetching the trending data.', ephemeral: true });
+            } catch (replyError) {
+                console.error('Failed to send reply:', replyError);
+            }
         }
     },
 };

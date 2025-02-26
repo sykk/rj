@@ -1,124 +1,120 @@
-const { SlashCommandBuilder, MessageFlags } = require('@discordjs/builders');
-const telegramBot = require('../utils/telegramBot');
-const relayPairs = {};
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const { loadWatchlist, saveWatchlist } = require('../utils/watchlist');
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('relay')
-        .setDescription('Manage relay pairs between Discord and Telegram')
-        .addSubcommand(subcommand =>
-            subcommand
-                .setName('start')
-                .setDescription('Starts a relay pair')
-                .addStringOption(option =>
-                    option.setName('discordchannelid')
-                        .setDescription('The Discord channel ID')
-                        .setRequired(true))
-                .addStringOption(option =>
-                    option.setName('telegramchannelid')
-                        .setDescription('The Telegram channel ID')
-                        .setRequired(true)))
-        .addSubcommand(subcommand =>
-            subcommand
-                .setName('stop')
-                .setDescription('Stops the relay'))
+        .setName('cryptowatch')
+        .setDescription('Manage your cryptocurrency watchlist')
         .addSubcommand(subcommand =>
             subcommand
                 .setName('add')
-                .setDescription('Adds a relay pair')
+                .setDescription('Add a cryptocurrency to your watchlist')
                 .addStringOption(option =>
-                    option.setName('discordchannelid')
-                        .setDescription('The Discord channel ID')
+                    option.setName('symbol')
+                        .setDescription('The cryptocurrency symbol (e.g., BTC, ETH)')
                         .setRequired(true))
-                .addStringOption(option =>
-                    option.setName('telegramchannelid')
-                        .setDescription('The Telegram channel ID')
+                .addNumberOption(option =>
+                    option.setName('percent')
+                        .setDescription('The percentage increase to alert for')
                         .setRequired(true)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('delete')
-                .setDescription('Deletes a relay pair')
+                .setDescription('Delete a cryptocurrency from your watchlist')
                 .addStringOption(option =>
-                    option.setName('discordchannelid')
-                        .setDescription('The Discord channel ID')
-                        .setRequired(true))
-                .addStringOption(option =>
-                    option.setName('telegramchannelid')
-                        .setDescription('The Telegram channel ID')
+                    option.setName('symbol')
+                        .setDescription('The cryptocurrency symbol (e.g., BTC, ETH)')
                         .setRequired(true)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('list')
-                .setDescription('Lists all relay pairs')),
+                .setDescription('List your watchlist')),
     async execute(interaction) {
         try {
             const subcommand = interaction.options.getSubcommand();
-            if (subcommand === 'start') {
-                const discordChannelId = interaction.options.getString('discordchannelid');
-                const telegramChannelId = interaction.options.getString('telegramchannelid');
-
-                if (relayPairs[telegramChannelId]) {
-                    await interaction.reply({ content: 'Relay already exists for this Telegram channel ID.', flags: MessageFlags.EPHEMERAL });
-                    return;
-                }
-
-                const discordChannel = interaction.client.channels.cache.get(discordChannelId);
-                if (!discordChannel) {
-                    await interaction.reply({ content: 'Invalid Discord channel ID.', flags: MessageFlags.EPHEMERAL });
-                    return;
-                }
-
-                telegramBot.getChat(telegramChannelId).then(chat => {
-                    relayPairs[telegramChannelId] = discordChannelId;
-                    telegramBot.on('message', relayMessage);
-                    interaction.reply(`Relay started between Discord channel ID ${discordChannelId} and Telegram channel ID ${telegramChannelId}`);
-                }).catch(error => {
-                    interaction.reply({ content: 'Invalid Telegram channel ID.', flags: MessageFlags.EPHEMERAL });
-                });
-            } else if (subcommand === 'stop') {
-                await interaction.reply('Relay stopped.');
-                telegramBot.removeAllListeners('message');
-            } else if (subcommand === 'add') {
-                const discordChannelId = interaction.options.getString('discordchannelid');
-                const telegramChannelId = interaction.options.getString('telegramchannelid');
-
-                relayPairs[telegramChannelId] = discordChannelId;
-                await interaction.reply(`Relay pair added: Discord Channel ID ${discordChannelId} <-> Telegram Channel ID ${telegramChannelId}`);
-
-                const discordChannel = interaction.client.channels.cache.get(discordChannelId);
-                if (discordChannel) {
-                    await interaction.followUp(`Connected to Discord channel ID ${discordChannelId}`);
-                } else {
-                    await interaction.followUp({ content: `Failed to connect to Discord channel ID ${discordChannelId}`, flags: MessageFlags.EPHEMERAL });
-                }
-
-                telegramBot.getChat(telegramChannelId).then(chat => {
-                    interaction.followUp(`Connected to Telegram channel ID ${telegramChannelId}`);
-                }).catch(error => {
-                    interaction.followUp({ content: `Failed to connect to Telegram channel ID ${telegramChannelId}`, flags: MessageFlags.EPHEMERAL });
-                });
+            if (subcommand === 'add') {
+                return await this.addWatch(interaction);
             } else if (subcommand === 'delete') {
-                const discordChannelId = interaction.options.getString('discordchannelid');
-                const telegramChannelId = interaction.options.getString('telegramchannelid');
-
-                if (relayPairs[telegramChannelId] === discordChannelId) {
-                    delete relayPairs[telegramChannelId];
-                    await interaction.reply(`Relay pair deleted: Discord Channel ID ${discordChannelId} <-> Telegram Channel ID ${telegramChannelId}`);
-                } else {
-                    await interaction.reply({ content: 'No such relay pair found.', flags: MessageFlags.EPHEMERAL });
-                }
+                return await this.deleteWatch(interaction);
             } else if (subcommand === 'list') {
-                if (Object.keys(relayPairs).length === 0) {
-                    await interaction.reply({ content: 'No relay pairs found.', flags: MessageFlags.EPHEMERAL });
-                    return;
-                }
-
-                const relayList = Object.entries(relayPairs).map(([telegram, discord]) => `Telegram: ${telegram} <-> Discord: ${discord}`).join('\n');
-                await interaction.reply({ content: `Relay pairs:\n${relayList}`, flags: MessageFlags.EPHEMERAL });
+                return await this.listWatch(interaction);
+            } else {
+                throw new Error('Invalid subcommand');
             }
         } catch (error) {
             console.error(`Error executing command: ${error.message}`);
-            await interaction.reply({ content: 'There was an error trying to execute the command.', flags: MessageFlags.EPHEMERAL });
+            try {
+                await interaction.reply({ content: 'There was an error trying to execute the command.', ephemeral: true });
+            } catch (replyError) {
+                console.error('Failed to send reply:', replyError);
+            }
         }
     },
+
+    async addWatch(interaction) {
+        try {
+            const crypto = interaction.options.getString('symbol').toUpperCase();
+            const percent = interaction.options.getNumber('percent');
+
+            const watchlist = loadWatchlist();
+            watchlist.push({ crypto, percent });
+            saveWatchlist(watchlist);
+
+            console.debug(`Added ${crypto} with alert set for ${percent}% increase.`);
+            await interaction.reply({ content: `Added ${crypto} to watchlist with alert set for ${percent}% increase.`, ephemeral: true });
+        } catch (error) {
+            console.error(`Failed to add watch: ${error.message}`);
+            try {
+                await interaction.reply({ content: 'There was an error adding to the watchlist.', ephemeral: true });
+            } catch (replyError) {
+                console.error('Failed to send reply:', replyError);
+            }
+        }
+    },
+
+    async deleteWatch(interaction) {
+        try {
+            const crypto = interaction.options.getString('symbol').toUpperCase();
+
+            let watchlist = loadWatchlist();
+            watchlist = watchlist.filter(item => item.crypto !== crypto);
+            saveWatchlist(watchlist);
+
+            console.debug(`Deleted ${crypto} from watchlist.`);
+            await interaction.reply({ content: `Deleted ${crypto} from watchlist.`, ephemeral: true });
+        } catch (error) {
+            console.error(`Failed to delete watch: ${error.message}`);
+            try {
+                await interaction.reply({ content: 'There was an error deleting from the watchlist.', ephemeral: true });
+            } catch (replyError) {
+                console.error('Failed to send reply:', replyError);
+            }
+        }
+    },
+
+    async listWatch(interaction) {
+        try {
+            const watchlist = loadWatchlist();
+
+            if (watchlist.length === 0) {
+                console.debug('Watchlist is empty.');
+                await interaction.reply({ content: 'Your watchlist is empty.', ephemeral: true });
+                return;
+            }
+
+            const embed = new EmbedBuilder()
+                .setTitle('Your Cryptocurrency Watchlist')
+                .setDescription(watchlist.map(item => `${item.crypto}: Alert at ${item.percent}% increase`).join('\n'));
+
+            console.debug('Displaying watchlist:', watchlist);
+            await interaction.reply({ embeds: [embed], ephemeral: true });
+        } catch (error) {
+            console.error(`Failed to list watch: ${error.message}`);
+            try {
+                await interaction.reply({ content: 'There was an error listing the watchlist.', ephemeral: true });
+            } catch (replyError) {
+                console.error('Failed to send reply:', replyError);
+            }
+        }
+    }
 };

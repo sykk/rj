@@ -13,7 +13,7 @@ module.exports = {
     async execute(interaction) {
         // Check if the user is an admin
         if (!isAdmin(interaction.user.id)) {
-            return interaction.reply({ content: 'You do not have permission to use this command.', flags: MessageFlags.EPHEMERAL });
+            return interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
         }
 
         const symbol = interaction.options.getString('symbol').toUpperCase();
@@ -37,7 +37,11 @@ module.exports = {
             await interaction.reply({ embeds: [embed] });
         } catch (error) {
             console.error(`Error fetching cryptocurrency data: ${error.message}`);
-            await interaction.reply({ content: 'There was an error fetching the cryptocurrency data.', flags: MessageFlags.EPHEMERAL });
+            try {
+                await interaction.reply({ content: 'There was an error fetching the cryptocurrency data.', ephemeral: true });
+            } catch (replyError) {
+                console.error('Failed to send reply:', replyError);
+            }
         }
     },
 };
