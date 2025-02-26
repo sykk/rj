@@ -6,5 +6,9 @@
   {
     "crypto": "SOL",
     "percent": 0.1
+  },
+  {
+    "crypto": "ETH",
+    "percent": 0.1
   }
 ]
