@@ -5,44 +5,44 @@ const relayPairs = {};
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('relay')
-        .setDescription('Manage relays between Discord and Telegram')
-        .addSubcommand(subcommand =>
-            subcommand
-                .setName('start')
-                .setDescription('Start the relay'))
-        .addSubcommand(subcommand =>
-            subcommand
-                .setName('stop')
-                .setDescription('Stop the relay'))
-        .addSubcommand(subcommand =>
-            subcommand
-                .setName('add')
-                .setDescription('Add a relay pair')
-                .addStringOption(option =>
-                    option.setName('discordchannelid')
-                        .setDescription('The Discord channel ID')
-                        .setRequired(true))
-                .addStringOption(option =>
-                    option.setName('telegramchannelid')
-                        .setDescription('The Telegram channel ID')
-                        .setRequired(true)))
-        .addSubcommand(subcommand =>
-            subcommand
-                .setName('delete')
-                .setDescription('Delete a relay pair')
-                .addStringOption(option =>
-                    option.setName('discordchannelid')
-                        .setDescription('The Discord channel ID')
-                        .setRequired(true))
-                .addStringOption(option =>
-                    option.setName('telegramchannelid')
-                        .setDescription('The Telegram channel ID')
-                        .setRequired(true)))
-        .addSubcommand(subcommand =>
-            subcommand
-                .setName('list')
-                .setDescription('List all relay pairs')),
+    .setName('relay')
+    .setDescription('Manage relays between Discord and Telegram')
+    .addSubcommand(subcommand =>
+    subcommand
+    .setName('start')
+    .setDescription('Start the relay'))
+    .addSubcommand(subcommand =>
+    subcommand
+    .setName('stop')
+    .setDescription('Stop the relay'))
+    .addSubcommand(subcommand =>
+    subcommand
+    .setName('add')
+    .setDescription('Add a relay pair')
+    .addStringOption(option =>
+    option.setName('discordchannelid')
+    .setDescription('The Discord channel ID')
+    .setRequired(true))
+    .addStringOption(option =>
+    option.setName('telegramchannelid')
+    .setDescription('The Telegram channel ID')
+    .setRequired(true)))
+    .addSubcommand(subcommand =>
+    subcommand
+    .setName('delete')
+    .setDescription('Delete a relay pair')
+    .addStringOption(option =>
+    option.setName('discordchannelid')
+    .setDescription('The Discord channel ID')
+    .setRequired(true))
+    .addStringOption(option =>
+    option.setName('telegramchannelid')
+    .setDescription('The Telegram channel ID')
+    .setRequired(true)))
+    .addSubcommand(subcommand =>
+    subcommand
+    .setName('list')
+    .setDescription('List all relay pairs')),
     async execute(interaction) {
         const subcommand = interaction.options.getSubcommand();
 
@@ -58,7 +58,7 @@ module.exports = {
                         const discordChannel = interaction.client.channels.cache.get(discordChannelId);
                         if (discordChannel) {
                             discordChannel.send(message.text)
-                                .catch(error => console.error(`Failed to send message to Discord channel ID ${discordChannelId}: ${error.message}`));
+                            .catch(error => console.error(`Failed to send message to Discord channel ID ${discordChannelId}: ${error.message}`));
                         } else {
                             console.error(`Discord channel ID ${discordChannelId} not found`);
                         }
@@ -113,8 +113,8 @@ module.exports = {
                 }
 
                 let relayList = new EmbedBuilder()
-                    .setTitle('Current Relay Pairs')
-                    .setColor(0x00AE86);
+                .setTitle('Current Relay Pairs')
+                .setColor(0x00AE86);
 
                 for (const [telegramChannelId, discordChannelId] of Object.entries(relayPairs)) {
                     relayList.addFields({ name: `Discord Channel ID: ${discordChannelId}`, value: `Telegram Channel ID: ${telegramChannelId}` });
