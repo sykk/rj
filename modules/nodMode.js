@@ -34,7 +34,7 @@ class NodMode {
         this.isNodding = true;
         this.client.channels.cache.forEach(channel => {
             if (channel.isTextBased()) {
-                channel.send(':rjnod: nodding off..');
+                channel.send(':rjnod: nodding off...').catch(console.error);
             }
         });
     }
@@ -44,7 +44,7 @@ class NodMode {
         this.client.channels.cache.forEach(channel => {
             if (channel.isTextBased()) {
                 setTimeout(() => {
-                    channel.send(':rj: i\'m awake.');
+                    channel.send(':rj: I\'m awake.').catch(console.error);
                 }, this.randomDelay(5, 10) * 1000);
             }
         });
@@ -63,7 +63,7 @@ class NodMode {
             if (this.exemptCommands.includes(command)) {
                 return;
             } else {
-                message.reply('I am currently in nod mode and cannot respond to commands.');
+                message.reply('I am currently in nod mode and cannot respond to commands.').catch(console.error);
             }
         } else {
             this.startInactivityTimer();

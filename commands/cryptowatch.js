@@ -1,50 +1,34 @@
-const { SlashCommandBuilder } = require('@discordjs/builders');
-const { EmbedBuilder, MessageFlags } = require('discord.js');
-const fs = require('fs');
-const path = require('path');
-
-const WATCHLIST_FILE = path.join(__dirname, 'watchlist.json');
-
-function loadWatchlist() {
-    if (!fs.existsSync(WATCHLIST_FILE)) {
-        return [];
-    }
-    const data = fs.readFileSync(WATCHLIST_FILE, 'utf8');
-    return JSON.parse(data);
-}
-
-function saveWatchlist(watchlist) {
-    fs.writeFileSync(WATCHLIST_FILE, JSON.stringify(watchlist, null, 2));
-}
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
+const { loadWatchlist, saveWatchlist } = require('../utils/watchlistUtils');
 
 module.exports = {
     data: new SlashCommandBuilder()
-    .setName('cryptowatch')
-    .setDescription('Tracks cryptocurrency price alerts')
-    .addSubcommand(subcommand =>
-    subcommand
-    .setName('add')
-    .setDescription('Add a cryptocurrency to your watchlist')
-    .addStringOption(option =>
-    option.setName('symbol')
-    .setDescription('The cryptocurrency symbol (e.g., BTC, ETH)')
-    .setRequired(true))
-    .addNumberOption(option =>
-    option.setName('percent')
-    .setDescription('The percentage increase to trigger an alert')
-    .setRequired(true)))
-    .addSubcommand(subcommand =>
-    subcommand
-    .setName('delete')
-    .setDescription('Delete a cryptocurrency from your watchlist')
-    .addStringOption(option =>
-    option.setName('symbol')
-    .setDescription('The cryptocurrency symbol (e.g., BTC, ETH)')
-    .setRequired(true)))
-    .addSubcommand(subcommand =>
-    subcommand
-    .setName('list')
-    .setDescription('List your watchlist')),
+        .setName('cryptowatch')
+        .setDescription('Manage your cryptocurrency watchlist')
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('add')
+                .setDescription('Add a cryptocurrency to your watchlist')
+                .addStringOption(option =>
+                    option.setName('symbol')
+                        .setDescription('The cryptocurrency symbol (e.g., BTC, ETH)')
+                        .setRequired(true))
+                .addNumberOption(option =>
+                    option.setName('percent')
+                        .setDescription('The percentage increase to trigger an alert')
+                        .setRequired(true)))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('delete')
+                .setDescription('Delete a cryptocurrency from your watchlist')
+                .addStringOption(option =>
+                    option.setName('symbol')
+                        .setDescription('The cryptocurrency symbol (e.g., BTC, ETH)')
+                        .setRequired(true)))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('list')
+                .setDescription('List your watchlist')),
     async execute(interaction) {
         try {
             const subcommand = interaction.options.getSubcommand();
@@ -107,8 +91,8 @@ module.exports = {
             }
 
             const embed = new EmbedBuilder()
-            .setTitle('Your Cryptocurrency Watchlist')
-            .setDescription(watchlist.map(item => `${item.crypto}: Alert at ${item.percent}% increase`).join('\n'));
+                .setTitle('Your Cryptocurrency Watchlist')
+                .setDescription(watchlist.map(item => `${item.crypto}: Alert at ${item.percent}% increase`).join('\n'));
 
             console.debug('Displaying watchlist:', watchlist);
             await interaction.reply({ embeds: [embed], flags: MessageFlags.EPHEMERAL });
