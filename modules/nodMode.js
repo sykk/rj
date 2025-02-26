@@ -54,7 +54,7 @@ class NodMode {
     handleMessage(message) {
         if (message.author.bot) return;
 
-        if (message.content.includes('@rj#9396 discord notify')) {
+        if (message.content.includes('@rj#9396')) {
             if (this.isNodding) {
                 this.deactivateNodMode();
             }
