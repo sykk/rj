@@ -1,7 +1,7 @@
 const fetch = require('node-fetch');
 
 function sendWebhook(title, article, link, imageSrc, price, message) {
-    const webhookUrl = 'YOUR_WEBHOOK_URL_HERE';
+    const webhookUrl = 'https://discord.com/api/webhooks/1344414560869810218/qkp-UMK98pZLrgsIBCzb9miFOZXft9NTtPIUTSMkTaenTdhy95ETm1r95yfQSqE8Ci1J';
     const data = {
         username: 'Pokemon Center Bot',
         embeds: [
