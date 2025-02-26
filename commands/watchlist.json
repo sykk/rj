@@ -1,14 +1,14 @@
 [
   {
-    "crypto": "BITCOIN",
-    "percent": 30
-  },
-  {
     "crypto": "SOL",
     "percent": 0.1
   },
   {
     "crypto": "ETH",
+    "percent": 0.1
+  },
+  {
+    "crypto": "BTC",
     "percent": 0.1
   }
 ]

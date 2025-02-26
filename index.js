@@ -49,10 +49,12 @@ client.on('interactionCreate', async interaction => {
         await command.execute(interaction);
     } catch (error) {
         console.error(error);
-        try {
-            await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
-        } catch (replyError) {
-            console.error('Failed to send reply:', replyError);
+        if (!interaction.replied && !interaction.deferred) {
+            try {
+                await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+            } catch (replyError) {
+                console.error('Failed to send reply:', replyError);
+            }
         }
     }
 });
