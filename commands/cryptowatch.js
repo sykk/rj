@@ -25,32 +25,32 @@ const saveWatchlist = (watchlist) => {
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('cryptowatch')
-        .setDescription('Manage your cryptocurrency watchlist and alerts')
-        .addSubcommand(subcommand =>
-            subcommand
-                .setName('add')
-                .setDescription('Add a cryptocurrency to your watchlist')
-                .addStringOption(option => 
-                    option.setName('symbol')
-                          .setDescription('The cryptocurrency symbol (e.g., BTC, ETH)')
-                          .setRequired(true))
-                .addNumberOption(option => 
-                    option.setName('percent')
-                          .setDescription('The percentage increase to trigger an alert')
-                          .setRequired(true)))
-        .addSubcommand(subcommand =>
-            subcommand
-                .setName('delete')
-                .setDescription('Delete a cryptocurrency from your watchlist')
-                .addStringOption(option => 
-                    option.setName('symbol')
-                          .setDescription('The cryptocurrency symbol (e.g., BTC, ETH)')
-                          .setRequired(true)))
-        .addSubcommand(subcommand =>
-            subcommand
-                .setName('list')
-                .setDescription('List your watchlist')),
+    .setName('cryptowatch')
+    .setDescription('Manage your cryptocurrency watchlist and alerts')
+    .addSubcommand(subcommand =>
+    subcommand
+    .setName('add')
+    .setDescription('Add a cryptocurrency to your watchlist')
+    .addStringOption(option =>
+    option.setName('symbol')
+    .setDescription('The cryptocurrency symbol (e.g., BTC, ETH)')
+    .setRequired(true))
+    .addNumberOption(option =>
+    option.setName('percent')
+    .setDescription('The percentage increase to trigger an alert')
+    .setRequired(true)))
+    .addSubcommand(subcommand =>
+    subcommand
+    .setName('delete')
+    .setDescription('Delete a cryptocurrency from your watchlist')
+    .addStringOption(option =>
+    option.setName('symbol')
+    .setDescription('The cryptocurrency symbol (e.g., BTC, ETH)')
+    .setRequired(true)))
+    .addSubcommand(subcommand =>
+    subcommand
+    .setName('list')
+    .setDescription('List your watchlist')),
     async execute(interaction) {
         try {
             const subcommand = interaction.options.getSubcommand();
@@ -110,5 +110,15 @@ module.exports = {
                 await interaction.reply({ content: 'Watchlist is empty.', ephemeral: true });
             } else {
                 const embed = new EmbedBuilder()
-                    .setTitle('Current Watchlist')
-                    .setDescription(watchlist.map(item
+                .setTitle('Current Watchlist')
+                .setDescription(watchlist.map(item => `${item.crypto}: ${item.percent}%`).join('\n'))
+                .setColor(0x00AE86);
+
+                await interaction.reply({ embeds: [embed], ephemeral: true });
+            }
+        } catch (error) {
+            console.error(`Failed to list watchlist: ${error.message}`);
+            await interaction.reply({ content: 'There was an error listing the watchlist.', ephemeral: true });
+        }
+    },
+};
