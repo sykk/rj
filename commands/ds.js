@@ -1,6 +1,7 @@
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const axios = require('axios');
-const { EmbedBuilder, SlashCommandBuilder } = require('discord.js');
 const isAdmin = require('../utils/isAdmin');
+const logger = require('../logger'); // Add the logger
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -53,7 +54,7 @@ module.exports = {
                     .setColor(0x00AE86);
 
                 await interaction.reply({ embeds: [embed] });
-
+                logger.log(`Fetched trending tokens for interval ${interval}`); // Log success
             } else if (subcommand === 'token') {
                 const symbol = interaction.options.getString('symbol').toUpperCase();
                 const response = await axios.get(`https://api.dexscreener.com/latest/dex/tokens/${symbol}/trending?interval=${interval}`);
@@ -69,13 +70,16 @@ module.exports = {
                     .setColor(0x00AE86);
 
                 await interaction.reply({ embeds: [embed] });
+                logger.log(`Fetched trending tokens for ${symbol} with interval ${interval}`); // Log success
             }
         } catch (error) {
             console.error(`Error fetching trending data: ${error.message}`);
+            logger.error('Error fetching trending data', error); // Log error
             try {
                 await interaction.reply({ content: 'There was an error fetching the trending data.', flags: MessageFlags.EPHEMERAL });
             } catch (replyError) {
                 console.error('Failed to send reply:', replyError);
+                logger.error('Failed to send reply', replyError); // Log error
             }
         }
     },

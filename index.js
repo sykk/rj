@@ -2,6 +2,7 @@ const { Client, GatewayIntentBits } = require('discord.js');
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
+const logger = require('./logger'); // Add the logger
 
 // Import the Watcher class
 const Watcher = require('./modules/watcher');
@@ -10,6 +11,7 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBit
 
 client.once('ready', async () => {
     console.log(`Logged in as ${client.user.tag}!`);
+    logger.log(`Logged in as ${client.user.tag}!`); // Log info
 
     // Instantiate and start the watcher when the client is ready
     const watcher = new Watcher();
@@ -49,11 +51,13 @@ client.on('interactionCreate', async interaction => {
         await command.execute(interaction);
     } catch (error) {
         console.error(error);
+        logger.error('Error executing command', error); // Log error
         if (!interaction.replied && !interaction.deferred) {
             try {
                 await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
             } catch (replyError) {
                 console.error('Failed to send reply:', replyError);
+                logger.error('Failed to send reply', replyError); // Log error
             }
         }
     }

@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const axios = require('axios');
 const isAdmin = require('../utils/isAdmin');
+const logger = require('../logger'); // Add the logger
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -35,12 +36,15 @@ module.exports = {
                 .setColor(0x00AE86);
 
             await interaction.reply({ embeds: [embed], flags: MessageFlags.EPHEMERAL });
+            logger.log(`Fetched cryptocurrency price for ${symbol}: $${cryptoData.amount}`); // Log success
         } catch (error) {
             console.error(`Error fetching cryptocurrency data: ${error.message}`);
+            logger.error('Error fetching cryptocurrency data', error); // Log error
             try {
                 await interaction.reply({ content: 'There was an error fetching the cryptocurrency data.', flags: MessageFlags.EPHEMERAL });
             } catch (replyError) {
                 console.error('Failed to send reply:', replyError);
+                logger.error('Failed to send reply', replyError); // Log error
             }
         }
     },
