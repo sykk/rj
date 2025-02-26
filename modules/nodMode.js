@@ -1,7 +1,10 @@
 const { Client, GatewayIntentBits, Events } = require('discord.js');
 
+console.log('[NodMode] Loading nodMode.js module...');
+
 class NodMode {
     constructor(client) {
+        console.log('[NodMode] Constructing NodMode instance...');
         this.client = client;
         this.nodTimeout = null;
         this.isNodding = false;
@@ -103,3 +106,5 @@ module.exports = {
         name: 'nodMode'
     }
 };
+
+console.log('[NodMode] nodMode.js module loaded successfully.');
