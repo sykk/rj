@@ -4,8 +4,8 @@ const { MessageFlags } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('restart')
-        .setDescription('Restarts the bot'),
+    .setName('restart')
+    .setDescription('Restarts the bot'),
     async execute(interaction) {
         try {
             await interaction.reply('Restarting the bot...');
