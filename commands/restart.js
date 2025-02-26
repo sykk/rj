@@ -34,4 +34,9 @@ module.exports = {
             console.error(`Failed to execute restart command: ${error.message}`);
             try {
                 await interaction.reply({ content: 'There was an error executing the restart command.', ephemeral: true });
-            } catch (replyError
+            } catch (replyError) {
+                console.error('Failed to send reply:', replyError);
+            }
+        }
+    },
+};
