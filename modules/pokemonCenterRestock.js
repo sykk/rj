@@ -62,7 +62,15 @@ function sendWebhook(title, article, link, image, price, stockStatus) {
 async function fetchDataPokemonCenter(isInitial = false) {
     try {
         for (const url of urls) {
-            const response = await fetch(url);
+            let response;
+            for (let attempt = 0; attempt < 3; attempt++) {
+                try {
+                    response = await fetch(url, { timeout: 10000 }); // 10 seconds timeout
+                    if (response.ok) break;
+                } catch (error) {
+                    if (attempt === 2) throw error; // Throw error after 3 attempts
+                }
+            }
             const body = await response.text();
             const $ = cheerio.load(body);
 
@@ -125,12 +133,5 @@ function automaticGetStock() {
 }
 
 // Initial fetch to populate known products
-fetchDataPokemonCenter(true).then(() => {
-    console.log('Initial product list fetched. Starting automatic checks...');
-    sendWebhook("Pokemon Center JP Monitor Started", "", "", "", "");
-    automaticGetStock();
-});
-
-export const data = {
-    name: 'pokemonCenterRestock'
-};
+fetchDataPokemonCenter(true);
+automaticGetStock();
