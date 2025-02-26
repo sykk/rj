@@ -89,10 +89,10 @@ module.exports = {
 
                 try {
                     const chat = await telegramBot.getChat(telegramChannelId);
-                    interaction.followUp(`Connected to Telegram channel ID ${telegramChannelId}`);
+                    await interaction.followUp(`Connected to Telegram channel ID ${telegramChannelId}`);
                     console.log(`Connected to Telegram channel ID ${telegramChannelId}`);
                 } catch (error) {
-                    interaction.followUp(`Failed to connect to Telegram channel ID ${telegramChannelId}`);
+                    await interaction.followUp(`Failed to connect to Telegram channel ID ${telegramChannelId}`);
                     console.error(`Failed to connect to Telegram channel ID ${telegramChannelId}: ${error.message}`);
                 }
             } else if (subcommand === 'delete') {
