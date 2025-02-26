@@ -87,13 +87,14 @@ module.exports = {
                     console.error(`Failed to connect to Discord channel ID ${discordChannelId}`);
                 }
 
-                telegramBot.getChat(telegramChannelId).then(chat => {
+                try {
+                    const chat = await telegramBot.getChat(telegramChannelId);
                     interaction.followUp(`Connected to Telegram channel ID ${telegramChannelId}`);
                     console.log(`Connected to Telegram channel ID ${telegramChannelId}`);
-                }).catch(error => {
+                } catch (error) {
                     interaction.followUp(`Failed to connect to Telegram channel ID ${telegramChannelId}`);
                     console.error(`Failed to connect to Telegram channel ID ${telegramChannelId}: ${error.message}`);
-                });
+                }
             } else if (subcommand === 'delete') {
                 const discordChannelId = interaction.options.getString('discordchannelid');
                 const telegramChannelId = interaction.options.getString('telegramchannelid');
@@ -124,7 +125,9 @@ module.exports = {
             }
         } catch (error) {
             console.error(`Failed to execute relay command: ${error.message}`);
-            await interaction.reply({ content: 'There was an error executing the relay command.', ephemeral: true });
+            if (!interaction.replied && !interaction.deferred) {
+                await interaction.reply({ content: 'There was an error executing the relay command.', ephemeral: true });
+            }
         }
     },
 };
