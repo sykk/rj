@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, MessageFlags } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -19,7 +19,7 @@ module.exports = {
             await interaction.editReply({ embeds: [embed] });
         } catch (error) {
             console.error(`Failed to execute ping command: ${error.message}`);
-            await interaction.reply({ content: 'There was an error executing the ping command.', ephemeral: true });
+            await interaction.reply({ content: 'There was an error executing the ping command.', flags: MessageFlags.EPHEMERAL });
         }
     },
 };

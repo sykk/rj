@@ -1,56 +1,34 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const fs = require('fs');
-const path = require('path');
-const { EmbedBuilder } = require('discord.js');
-const watchlistPath = path.join(__dirname, 'watchlist.json');
-
-const loadWatchlist = () => {
-    try {
-        if (fs.existsSync(watchlistPath)) {
-            return JSON.parse(fs.readFileSync(watchlistPath, 'utf8'));
-        }
-    } catch (error) {
-        console.error(`Failed to load watchlist: ${error.message}`);
-    }
-    return [];
-};
-
-const saveWatchlist = (watchlist) => {
-    try {
-        fs.writeFileSync(watchlistPath, JSON.stringify(watchlist, null, 2), 'utf8');
-    } catch (error) {
-        console.error(`Failed to save watchlist: ${error.message}`);
-    }
-};
+const { EmbedBuilder, MessageFlags } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
-    .setName('cryptowatch')
-    .setDescription('Manage your cryptocurrency watchlist and alerts')
-    .addSubcommand(subcommand =>
-    subcommand
-    .setName('add')
-    .setDescription('Add a cryptocurrency to your watchlist')
-    .addStringOption(option =>
-    option.setName('symbol')
-    .setDescription('The cryptocurrency symbol (e.g., BTC, ETH)')
-    .setRequired(true))
-    .addNumberOption(option =>
-    option.setName('percent')
-    .setDescription('The percentage increase to trigger an alert')
-    .setRequired(true)))
-    .addSubcommand(subcommand =>
-    subcommand
-    .setName('delete')
-    .setDescription('Delete a cryptocurrency from your watchlist')
-    .addStringOption(option =>
-    option.setName('symbol')
-    .setDescription('The cryptocurrency symbol (e.g., BTC, ETH)')
-    .setRequired(true)))
-    .addSubcommand(subcommand =>
-    subcommand
-    .setName('list')
-    .setDescription('List your watchlist')),
+        .setName('cryptowatch')
+        .setDescription('Tracks cryptocurrency price alerts')
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('add')
+                .setDescription('Add a cryptocurrency to your watchlist')
+                .addStringOption(option => 
+                    option.setName('symbol')
+                          .setDescription('The cryptocurrency symbol (e.g., BTC, ETH)')
+                          .setRequired(true))
+                .addNumberOption(option => 
+                    option.setName('percent')
+                          .setDescription('The percentage increase to trigger an alert')
+                          .setRequired(true)))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('delete')
+                .setDescription('Delete a cryptocurrency from your watchlist')
+                .addStringOption(option => 
+                    option.setName('symbol')
+                          .setDescription('The cryptocurrency symbol (e.g., BTC, ETH)')
+                          .setRequired(true)))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('list')
+                .setDescription('List your watchlist')),
     async execute(interaction) {
         try {
             const subcommand = interaction.options.getSubcommand();
@@ -65,7 +43,7 @@ module.exports = {
             }
         } catch (error) {
             console.error(`Error executing command: ${error.message}`);
-            await interaction.reply({ content: 'There was an error trying to execute the command.', ephemeral: true });
+            await interaction.reply({ content: 'There was an error trying to execute the command.', flags: MessageFlags.EPHEMERAL });
         }
     },
 
@@ -79,10 +57,10 @@ module.exports = {
             saveWatchlist(watchlist);
 
             console.debug(`Added ${crypto} with alert set for ${percent}% increase.`);
-            await interaction.reply({ content: `Added ${crypto} to watchlist with alert set for ${percent}% increase.`, ephemeral: true });
+            await interaction.reply({ content: `Added ${crypto} to watchlist with alert set for ${percent}% increase.`, flags: MessageFlags.EPHEMERAL });
         } catch (error) {
             console.error(`Failed to add watch: ${error.message}`);
-            await interaction.reply({ content: 'There was an error adding to the watchlist.', ephemeral: true });
+            await interaction.reply({ content: 'There was an error adding to the watchlist.', flags: MessageFlags.EPHEMERAL });
         }
     },
 
@@ -95,10 +73,10 @@ module.exports = {
             saveWatchlist(watchlist);
 
             console.debug(`Deleted ${crypto} from watchlist.`);
-            await interaction.reply({ content: `Deleted ${crypto} from watchlist.`, ephemeral: true });
+            await interaction.reply({ content: `Deleted ${crypto} from watchlist.`, flags: MessageFlags.EPHEMERAL });
         } catch (error) {
             console.error(`Failed to delete watch: ${error.message}`);
-            await interaction.reply({ content: 'There was an error deleting from the watchlist.', ephemeral: true });
+            await interaction.reply({ content: 'There was an error deleting from the watchlist.', flags: MessageFlags.EPHEMERAL });
         }
     },
 
@@ -107,18 +85,20 @@ module.exports = {
             const watchlist = loadWatchlist();
 
             if (watchlist.length === 0) {
-                await interaction.reply({ content: 'Watchlist is empty.', ephemeral: true });
-            } else {
-                const embed = new EmbedBuilder()
-                .setTitle('Current Watchlist')
-                .setDescription(watchlist.map(item => `${item.crypto}: ${item.percent}%`).join('\n'))
-                .setColor(0x00AE86);
-
-                await interaction.reply({ embeds: [embed], ephemeral: true });
+                console.debug('Watchlist is empty.');
+                await interaction.reply({ content: 'Your watchlist is empty.', flags: MessageFlags.EPHEMERAL });
+                return;
             }
+
+            const embed = new EmbedBuilder()
+                .setTitle('Your Cryptocurrency Watchlist')
+                .setDescription(watchlist.map(item => `${item.crypto}: Alert at ${item.percent}% increase`).join('\n'));
+
+            console.debug('Displaying watchlist:', watchlist);
+            await interaction.reply({ embeds: [embed], flags: MessageFlags.EPHEMERAL });
         } catch (error) {
-            console.error(`Failed to list watchlist: ${error.message}`);
-            await interaction.reply({ content: 'There was an error listing the watchlist.', ephemeral: true });
+            console.error(`Failed to list watch: ${error.message}`);
+            await interaction.reply({ content: 'There was an error listing the watchlist.', flags: MessageFlags.EPHEMERAL });
         }
-    },
+    }
 };
