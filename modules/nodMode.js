@@ -31,20 +31,26 @@ class NodMode {
     }
 
     activateNodMode() {
+        console.log('Activating nod mode...');
         this.isNodding = true;
         this.client.channels.cache.forEach(channel => {
             if (channel.isTextBased()) {
-                channel.send(':rjnod: nodding off...').catch(console.error);
+                channel.send(':rjnod: nodding off...')
+                .then(() => console.log(`Message sent in channel ${channel.id}`))
+                .catch(error => console.error(`Error sending message in channel ${channel.id}: ${error}`));
             }
         });
     }
 
     deactivateNodMode() {
+        console.log('Deactivating nod mode...');
         this.isNodding = false;
         this.client.channels.cache.forEach(channel => {
             if (channel.isTextBased()) {
                 setTimeout(() => {
-                    channel.send(':rj: I\'m awake.').catch(console.error);
+                    channel.send(':rj: I\'m awake.')
+                    .then(() => console.log(`Message sent in channel ${channel.id}`))
+                    .catch(error => console.error(`Error sending message in channel ${channel.id}: ${error}`));
                 }, this.randomDelay(5, 10) * 1000);
             }
         });
@@ -63,7 +69,8 @@ class NodMode {
             if (this.exemptCommands.includes(command)) {
                 return;
             } else {
-                message.reply('I am currently in nod mode and cannot respond to commands.').catch(console.error);
+                message.reply('I am currently in nod mode and cannot respond to commands.')
+                .catch(error => console.error(`Error replying to message: ${error}`));
             }
         } else {
             this.startInactivityTimer();
