@@ -16,7 +16,11 @@ const commandFiles = fs.readdirSync(path.join(__dirname, 'commands')).filter(fil
 
 for (const file of commandFiles) {
     const command = require(path.join(__dirname, 'commands', file));
-    client.commands.set(command.data.name, command);
+    if (command.data && command.data.name) {
+        client.commands.set(command.data.name, command);
+    } else {
+        console.warn(`Command in file ${file} is missing 'data' or 'data.name' property.`);
+    }
 }
 
 // Dynamically read module files and set modules to the client
@@ -25,7 +29,11 @@ const moduleFiles = fs.readdirSync(path.join(__dirname, 'modules')).filter(file 
 
 for (const file of moduleFiles) {
     const module = require(path.join(__dirname, 'modules', file));
-    client.modules.set(module.data.name, module);
+    if (module.data && module.data.name) {
+        client.modules.set(module.data.name, module);
+    } else {
+        console.warn(`Module in file ${file} is missing 'data' or 'data.name' property.`);
+    }
 }
 
 client.on('interactionCreate', async interaction => {
@@ -39,7 +47,9 @@ client.on('interactionCreate', async interaction => {
         await command.execute(interaction);
     } catch (error) {
         console.error(error);
-        await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+        if (!interaction.replied && !interaction.deferred) {
+            await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+        }
     }
 });
 
