@@ -10,7 +10,6 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBit
 
 client.once('ready', async () => {
     console.log(`Logged in as ${client.user.tag}!`);
-    console.log('Node mode is working correctly.');
 
     // Instantiate and start the watcher when the client is ready
     const watcher = new Watcher();

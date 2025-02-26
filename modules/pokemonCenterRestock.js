@@ -5,7 +5,7 @@ const urls = [
     'https://www.pokemoncenter-online.com/?p_cd=4521329421353',
 'https://www.pokemoncenter-online.com/?p_cd=4521329421377'
 ];
-const webhookLink = "https://ptb.discord.com/api/webhooks/1308971250801971250/xtNPhsWcXoE-RCjrE-CPuahoYdG991rJm0N_PVy1KcnMLjNkj6VDaXawhiGpW7cGdOeC";
+const webhookLink = "https://discord.com/api/webhooks/1344414560869810218/qkp-UMK98pZLrgsIBCzb9miFOZXft9NTtPIUTSMkTaenTdhy95ETm1r95yfQSqE8Ci1J";
 let knownProducts = new Map();
 
 function sendWebhook(title, article, link, image, price, stockStatus) {
@@ -135,3 +135,7 @@ function automaticGetStock() {
 // Initial fetch to populate known products
 fetchDataPokemonCenter(true);
 automaticGetStock();
+
+export const data = {
+        name: 'pokemonCenterRestock'
+     };

@@ -1,22 +1,23 @@
-const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder, MessageFlags } = require('@discordjs/builders');
 const telegramBot = require('../utils/telegramBot');
+const relayPairs = {};
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('relay')
-        .setDescription('Manages relays between Discord and Telegram')
+        .setDescription('Manage relay pairs between Discord and Telegram')
         .addSubcommand(subcommand =>
             subcommand
                 .setName('start')
-                .setDescription('Starts the relay')
+                .setDescription('Starts a relay pair')
                 .addStringOption(option =>
                     option.setName('discordchannelid')
-                          .setDescription('The Discord channel ID')
-                          .setRequired(true))
+                        .setDescription('The Discord channel ID')
+                        .setRequired(true))
                 .addStringOption(option =>
                     option.setName('telegramchannelid')
-                          .setDescription('The Telegram channel ID')
-                          .setRequired(true)))
+                        .setDescription('The Telegram channel ID')
+                        .setRequired(true)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('stop')
@@ -24,27 +25,27 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('add')
-                .setDescription('Adds a new relay pair')
+                .setDescription('Adds a relay pair')
                 .addStringOption(option =>
                     option.setName('discordchannelid')
-                          .setDescription('The Discord channel ID')
-                          .setRequired(true))
+                        .setDescription('The Discord channel ID')
+                        .setRequired(true))
                 .addStringOption(option =>
                     option.setName('telegramchannelid')
-                          .setDescription('The Telegram channel ID')
-                          .setRequired(true)))
+                        .setDescription('The Telegram channel ID')
+                        .setRequired(true)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('delete')
                 .setDescription('Deletes a relay pair')
                 .addStringOption(option =>
                     option.setName('discordchannelid')
-                          .setDescription('The Discord channel ID')
-                          .setRequired(true))
+                        .setDescription('The Discord channel ID')
+                        .setRequired(true))
                 .addStringOption(option =>
                     option.setName('telegramchannelid')
-                          .setDescription('The Telegram channel ID')
-                          .setRequired(true)))
+                        .setDescription('The Telegram channel ID')
+                        .setRequired(true)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('list')
@@ -108,23 +109,16 @@ module.exports = {
                 }
             } else if (subcommand === 'list') {
                 if (Object.keys(relayPairs).length === 0) {
-                    await interaction.reply({ content: 'No relay pairs have been added.', flags: MessageFlags.EPHEMERAL });
+                    await interaction.reply({ content: 'No relay pairs found.', flags: MessageFlags.EPHEMERAL });
                     return;
                 }
 
-                let relayList = new EmbedBuilder()
-                    .setTitle('Current Relay Pairs')
-                    .setColor(0x00AE86);
-
-                for (const [telegramChannelId, discordChannelId] of Object.entries(relayPairs)) {
-                    relayList.addFields({ name: `Discord Channel ID: ${discordChannelId}`, value: `Telegram Channel ID: ${telegramChannelId}` });
-                }
-
-                await interaction.reply({ embeds: [relayList] });
+                const relayList = Object.entries(relayPairs).map(([telegram, discord]) => `Telegram: ${telegram} <-> Discord: ${discord}`).join('\n');
+                await interaction.reply({ content: `Relay pairs:\n${relayList}`, flags: MessageFlags.EPHEMERAL });
             }
         } catch (error) {
-            console.error(`Failed to execute relay command: ${error.message}`);
-            await interaction.reply({ content: 'There was an error executing the relay command.', flags: MessageFlags.EPHEMERAL });
+            console.error(`Error executing command: ${error.message}`);
+            await interaction.reply({ content: 'There was an error trying to execute the command.', flags: MessageFlags.EPHEMERAL });
         }
     },
 };

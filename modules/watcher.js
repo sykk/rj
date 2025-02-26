@@ -67,3 +67,8 @@ class Watcher {
 }
 
 module.exports = Watcher;
+const data = {
+    name: 'watcher'
+};
+
+module.exports.data = data;
