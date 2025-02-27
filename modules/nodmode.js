@@ -1,5 +1,4 @@
 let nodMode = false;
-let exemptedCommands = ["!help", "!info"];
 let activityTimeout;
 
 function activateNodMode(channel) {
@@ -22,7 +21,7 @@ function resetActivityTimeout(channel) {
     activityTimeout = setTimeout(() => {
         console.log("Activity timeout triggered.");
         if (!nodMode) activateNodMode(channel);
-    }, 30000);
+    }, 30000); // 30 seconds
     console.log("Activity timeout set.");
 }
 
@@ -37,13 +36,15 @@ function handleMessage(message) {
         console.log("Nod mode is active.");
         if (message.content.toLowerCase() === 'rj') {
             deactivateNodMode(message.channel);
-        } else if (!exemptedCommands.includes(message.content.split(' ')[0])) {
-            console.log("Message is not exempted. Ignoring.");
+        } else if (!message.content.startsWith('!')) {
+            console.log("Message is not a command. Ignoring.");
             return false;
         }
     } else {
         console.log("Nod mode is not active. Resetting activity timeout.");
-        resetActivityTimeout(message.channel);
+        if (message.content.startsWith('!')) {
+            resetActivityTimeout(message.channel);
+        }
     }
 
     console.log("Message handled successfully.");
