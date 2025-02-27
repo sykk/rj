@@ -8,7 +8,7 @@ const { handleMessage, resetActivityTimeout } = require('./modules/nodmode'); //
 // Import the Watcher class
 const Watcher = require('./modules/watcher');
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 
 client.once('ready', async () => {
     console.log(`Logged in as ${client.user.tag}!`);
@@ -49,7 +49,7 @@ client.on('messageCreate', async message => {
     if (!handleMessage(message)) return;
 
     // Add your existing command handling logic here
-    if (message.content.startsWith('!')) {
+    if (message.content.startsWith('/')) {
         resetActivityTimeout(message.channel); // Reset activity timeout on every command message
     }
 });

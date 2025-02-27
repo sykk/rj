@@ -36,13 +36,13 @@ function handleMessage(message) {
         console.log("Nod mode is active.");
         if (message.content.toLowerCase() === 'rj') {
             deactivateNodMode(message.channel);
-        } else if (!message.content.startsWith('!')) {
+        } else if (!message.content.startsWith('/')) {
             console.log("Message is not a command. Ignoring.");
             return false;
         }
     } else {
         console.log("Nod mode is not active. Resetting activity timeout.");
-        if (message.content.startsWith('!')) {
+        if (message.content.startsWith('/')) {
             resetActivityTimeout(message.channel);
         }
     }
