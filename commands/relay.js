@@ -105,24 +105,21 @@ module.exports = {
             const watchlist = loadWatchlist();
 
             if (watchlist.length === 0) {
-                console.debug('Watchlist is empty.');
-                logger.log('Watchlist is empty.'); // Log info
-                await interaction.reply({ content: 'Your watchlist is empty.', flags: MessageFlags.EPHEMERAL });
-                return;
+                return interaction.reply({ content: 'The watchlist is empty.', flags: MessageFlags.EPHEMERAL });
             }
 
             const embed = new EmbedBuilder()
-            .setTitle('Your Cryptocurrency Watchlist')
-            .setDescription(watchlist.map(item => `${item.crypto}: Alert at ${item.percent}% increase`).join('\n'));
+            .setTitle('Cryptocurrency Watchlist')
+            .setDescription(watchlist.map(item => `${item.crypto}: ${item.percent}%`).join('\n'))
+            .setColor(0x00AE86);
 
-            console.debug('Displaying watchlist:', watchlist);
-            logger.log('Displaying watchlist'); // Log info
             await interaction.reply({ embeds: [embed], flags: MessageFlags.EPHEMERAL });
+            logger.log('Fetched watchlist'); // Log success
         } catch (error) {
-            console.error(`Failed to list watch: ${error.message}`);
-            logger.error('Failed to list watch', error); // Log error
+            console.error(`Failed to fetch watchlist: ${error.message}`);
+            logger.error('Failed to fetch watchlist', error); // Log error
             try {
-                await interaction.reply({ content: 'There was an error listing the watchlist.', flags: MessageFlags.EPHEMERAL });
+                await interaction.reply({ content: 'There was an error fetching the watchlist.', flags: MessageFlags.EPHEMERAL });
             } catch (replyError) {
                 console.error('Failed to send reply:', replyError);
                 logger.error('Failed to send reply', replyError); // Log error

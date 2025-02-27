@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits } = require('discord.js');
+const { Client, GatewayIntentBits, Collection } = require('discord.js');
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
@@ -8,19 +8,10 @@ const { handleMessage, resetActivityTimeout } = require('./modules/nodmode'); //
 // Import the Watcher class
 const Watcher = require('./modules/watcher');
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 
-client.once('ready', async () => {
-    console.log(`Logged in as ${client.user.tag}!`);
-    logger.log(`Logged in as ${client.user.tag}!`); // Log info
-
-    // Instantiate and start the watcher when the client is ready
-    const watcher = new Watcher();
-    watcher.start();
-});
-
-// Dynamically read command files and set commands to the client
-client.commands = new Map();
+// Command collection
+client.commands = new Collection();
 const commandFiles = fs.readdirSync(path.join(__dirname, 'commands')).filter(file => file.endsWith('.js'));
 
 for (const file of commandFiles) {
@@ -32,18 +23,30 @@ for (const file of commandFiles) {
     }
 }
 
-// Dynamically read module files and set modules to the client
-client.modules = new Map();
-const moduleFiles = fs.readdirSync(path.join(__dirname, 'modules')).filter(file => file.endsWith('.js'));
+// Event handling
+client.on('interactionCreate', async interaction => {
+    if (!interaction.isCommand()) return;
 
-for (const file of moduleFiles) {
-    const module = require(path.join(__dirname, 'modules', file));
-    if (module.data && module.data.name) {
-        client.modules.set(module.data.name, module);
-    } else {
-        console.warn(`Module '${file}' does not have a 'data' property.`);
+    const command = client.commands.get(interaction.commandName);
+
+    if (!command) return;
+
+    try {
+        await command.execute(interaction);
+    } catch (error) {
+        console.error(`Error executing command ${interaction.commandName}:`, error);
+        await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
     }
-}
+});
+
+client.once('ready', async () => {
+    console.log(`Logged in as ${client.user.tag}!`);
+    logger.log(`Logged in as ${client.user.tag}!`); // Log info
+
+    // Instantiate and start the watcher when the client is ready
+    const watcher = new Watcher();
+    watcher.start();
+});
 
 client.on('messageCreate', async message => {
     if (!handleMessage(message)) return;

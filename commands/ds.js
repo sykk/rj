@@ -5,28 +5,28 @@ const logger = require('../logger'); // Add the logger
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('ds')
-        .setDescription('Get trending tokens')
-        .addSubcommand(subcommand =>
-            subcommand
-                .setName('trending')
-                .setDescription('Get top 5 trending tokens')
-                .addStringOption(option =>
-                    option.setName('interval')
-                        .setDescription('Time interval for trending tokens (5m, 1h, 6h)')
-                        .setRequired(true)))
-        .addSubcommand(subcommand =>
-            subcommand
-                .setName('token')
-                .setDescription('Get top 5 trending of a specific token')
-                .addStringOption(option =>
-                    option.setName('symbol')
-                        .setDescription('The token symbol (e.g., BTC, ETH)')
-                        .setRequired(true))
-                .addStringOption(option =>
-                    option.setName('interval')
-                        .setDescription('Time interval for trending tokens (5m, 1h, 6h)')
-                        .setRequired(true))),
+    .setName('ds')
+    .setDescription('Get trending tokens')
+    .addSubcommand(subcommand =>
+    subcommand
+    .setName('trending')
+    .setDescription('Get top 5 trending tokens')
+    .addStringOption(option =>
+    option.setName('interval')
+    .setDescription('Time interval for trending tokens (5m, 1h, 6h)')
+    .setRequired(true)))
+    .addSubcommand(subcommand =>
+    subcommand
+    .setName('token')
+    .setDescription('Get top 5 trending of a specific token')
+    .addStringOption(option =>
+    option.setName('symbol')
+    .setDescription('The token symbol (e.g., BTC, ETH)')
+    .setRequired(true))
+    .addStringOption(option =>
+    option.setName('interval')
+    .setDescription('Time interval for trending tokens (5m, 1h, 6h)')
+    .setRequired(true))),
     async execute(interaction) {
         if (!isAdmin(interaction.user.id)) {
             return interaction.reply({ content: 'You do not have permission to use this command.', flags: MessageFlags.EPHEMERAL });
@@ -49,9 +49,9 @@ module.exports = {
                 }
 
                 const embed = new EmbedBuilder()
-                    .setTitle(`Top 5 Trending Tokens (${interval})`)
-                    .setDescription(trendingTokens.slice(0, 5).map((token, index) => `${index + 1}. ${token.baseToken.symbol} (${token.priceChange.percent})`).join('\n'))
-                    .setColor(0x00AE86);
+                .setTitle(`Top 5 Trending Tokens (${interval})`)
+                .setDescription(trendingTokens.slice(0, 5).map((token, index) => `${index + 1}. ${token.baseToken.symbol} (${token.priceChange.percent})`).join('\n'))
+                .setColor(0x00AE86);
 
                 await interaction.reply({ embeds: [embed] });
                 logger.log(`Fetched trending tokens for interval ${interval}`); // Log success
@@ -65,18 +65,18 @@ module.exports = {
                 }
 
                 const embed = new EmbedBuilder()
-                    .setTitle(`Top 5 Trending Tokens for ${symbol} (${interval})`)
-                    .setDescription(trendingTokens.slice(0, 5).map((token, index) => `${index + 1}. ${token.baseToken.symbol} (${token.priceChange.percent})`).join('\n'))
-                    .setColor(0x00AE86);
+                .setTitle(`Top 5 Trending Tokens for ${symbol} (${interval})`)
+                .setDescription(trendingTokens.slice(0, 5).map((token, index) => `${index + 1}. ${token.baseToken.symbol} (${token.priceChange.percent})`).join('\n'))
+                .setColor(0x00AE86);
 
                 await interaction.reply({ embeds: [embed] });
                 logger.log(`Fetched trending tokens for ${symbol} with interval ${interval}`); // Log success
             }
         } catch (error) {
-            console.error(`Error fetching trending data: ${error.message}`);
-            logger.error('Error fetching trending data', error); // Log error
+            console.error(`Error fetching trending tokens: ${error.message}`);
+            logger.error('Error fetching trending tokens', error); // Log error
             try {
-                await interaction.reply({ content: 'There was an error fetching the trending data.', flags: MessageFlags.EPHEMERAL });
+                await interaction.reply({ content: 'There was an error fetching the trending tokens.', flags: MessageFlags.EPHEMERAL });
             } catch (replyError) {
                 console.error('Failed to send reply:', replyError);
                 logger.error('Failed to send reply', replyError); // Log error
