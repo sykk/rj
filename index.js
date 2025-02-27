@@ -3,7 +3,6 @@ require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 const logger = require('./logger'); // Add the logger
-const { handleMessage, resetActivityTimeout } = require('./modules/nodmode'); // Import nodmode module
 
 // Import the Watcher class
 const Watcher = require('./modules/watcher');
@@ -46,12 +45,7 @@ for (const file of moduleFiles) {
 }
 
 client.on('messageCreate', async message => {
-    if (!handleMessage(message)) return;
-
     // Add your existing command handling logic here
-    if (message.content.startsWith('/')) {
-        resetActivityTimeout(message.channel); // Reset activity timeout on every command message
-    }
 });
 
 client.login(process.env.DISCORD_TOKEN);
