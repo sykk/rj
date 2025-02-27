@@ -3,6 +3,7 @@ require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 const logger = require('./logger'); // Add the logger
+const { handleMessage, resetActivityTimeout } = require('./modules/nodmode'); // Import nodmode module
 
 // Import the Watcher class
 const Watcher = require('./modules/watcher');
@@ -44,27 +45,11 @@ for (const file of moduleFiles) {
     }
 }
 
-client.on('interactionCreate', async interaction => {
-    if (!interaction.isCommand()) return;
+client.on('messageCreate', async message => {
+    if (!handleMessage(message)) return;
 
-    const command = client.commands.get(interaction.commandName);
-
-    if (!command) return;
-
-    try {
-        await command.execute(interaction);
-    } catch (error) {
-        console.error(error);
-        logger.error('Error executing command', error); // Log error
-        if (!interaction.replied && !interaction.deferred) {
-            try {
-                await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
-            } catch (replyError) {
-                console.error('Failed to send reply:', replyError);
-                logger.error('Failed to send reply', replyError); // Log error
-            }
-        }
-    }
+    // Add your existing command handling logic here
+    resetActivityTimeout(message.channel); // Reset activity timeout on every message
 });
 
 client.login(process.env.DISCORD_TOKEN);
