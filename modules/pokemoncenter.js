@@ -1,8 +1,10 @@
-const fetch = require('node-fetch');
-const { Client, Intents } = require('discord.js');
-require('dotenv').config();
+import fetch from 'node-fetch';
+import { Client, GatewayIntentBits } from 'discord.js';
+import dotenv from 'dotenv';
 
-const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
+dotenv.config();
+
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] });
 
 const url = 'https://www.pokemoncenter-online.com/?p_cd=4521329421377';
 let lastStatus = null;
